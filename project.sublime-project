@@ -1,0 +1,17 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+	 "build_systems":
+    [
+        {
+            "name": "compileCoffee",
+            "cmd": ["coffee -c -b ${project_path}"],
+            "selector": "source.coffee",
+            "shell": true
+        }
+    ]
+}

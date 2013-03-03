@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+
+  "name": "Youtube Playlist",
+  "description": "This extension helps you manage your current youtube playlist",
+  "version": "1.0",
+
+  "background": {
+    "scripts": ["lib/underscore.js", "playlist.js", "main.js"]
+  },
+  "permissions": [
+    "tabs",
+    "webNavigation",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["http://www.youtube.com/watch*"],
+      "js": ["contentScript.js"]
+    }
+  ]
+
+
+}
