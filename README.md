@@ -1,1 +1,3 @@
-#YoutubePlaylist Chrome Extension
+# YoutubePlaylist Chrome Extension #
+
+License: BSD
