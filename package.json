@@ -1,0 +1,17 @@
+{
+    "name" : "YoutubePlaylist",
+    "description" : "Google chrome YouTube Playlist extension",
+    "version" : "0.0.1",
+    "author" : "Klaus Jørgensen, Brian K. Christensen",
+    "keywords" : [
+        "youtube",
+        "chrome",
+        "extension",
+        "playlist"
+    ],
+    "devDependencies" : {
+        "underscore" : ">=0.0.1",
+        "mkdirp": ">=0.0.1"
+    },
+    "license" : "BSD"
+}

@@ -2,14 +2,15 @@
 	"folders":
 	[
 		{
-			"path": "."
+			"path": ".",
+			"folder_exclude_patterns": ["-p","node_modules"]
 		}
 	],
 	 "build_systems":
     [
         {
             "name": "compileCoffee",
-            "cmd": ["coffee -c -b ${project_path}"],
+            "cmd": ["cake build"],
             "selector": "source.coffee",
             "shell": true
         }
