@@ -1,6 +1,6 @@
 console.log "contentScript loaded"
 console.log "document state: " + document.readyState
-console.log chrome
+#console.log chrome
 
 #onYoutubePlayerReady() ->
 #	console.log 'svend'
@@ -40,29 +40,45 @@ console.log chrome
 #(document.head||document.documentElement).appendChild(s);
 
 player = document.getElementById('movie_player')
-console.log "player loaded, name: " + player.name
+console.log "player loaded"
 
-niels = () ->
-	console.log 'state changed. New state: ' + state
+initListeners = () ->
 
-#player.addEventListener "onStateChange", "niels"
+	player.addEventListener 'click', (e) ->
+		debugger
 
-console.log 'event should be added now, boss..'
-#do player.stopVideo
+	chrome.extension.sendMessage 'Greetings'
 
-chrome.extension.sendMessage 'Greetings'
-console.log 'greeting sent'
+	chrome.extension.onMessage.addListener (request, sender) ->
+		console.log 'Message received: ' + request
+		console.log 'sender.tab.url: ' + sender.tab.url
+		return unless request?
+		switch request
+			when 'stop' then do player.stopVideo
+			when 'play' then do player.playVideo
+			else console.error "unknown action: #{request.action}"
 
-chrome.extension.onMessage.addListener (request, sender) ->
-	console.log 'Message received: ' + request
-	console.log 'sender.tab.url: ' + sender.tab.url
+counter = 0
+isYoutubePlayerLoaded = () ->
+	return console.error "YoutubePlayer is never loaded after 30 tries" if counter >= 30
+	if player.getPlayerState?
+		return initListeners()
+	else
+		counter++
+		return setTimeout () ->
+			isYoutubePlayerLoaded()
+		, 100
 
-	return unless request?
-	switch request
-		when 'stop' then do @player.stopVideo + console.log 'player stopped.'
-		when 'play' then do @player.playVideo + console.log 'player started.'
-		#when 'play' then @player.playVideo
-		else console.error "unknown action: #{request.action}"
+isYoutubePlayerLoaded()
+
+injectJs = (link) ->
+	console.log "injecting: #{link} into the site"
+	scr = document.createElement 'script'
+	scr.type = 'text/javascript'
+	scr.src = link
+	(document.head or document.body or document.documentElement).appendChild scr
+
+injectJs chrome.extension.getURL 'inject.js'
 
 #port = chrome.extension.connect name: "playlist"
 
