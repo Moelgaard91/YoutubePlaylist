@@ -64,6 +64,10 @@ class Playlist
 		if @isPlaying() and (v = @list[tabId])?
 			v.playing = false
 			@publishEvent 'pause:video', tabId
+			@list[tabId].playing = true
+
+	setPaused: () ->
+		@current.playing = false if @current?
 
 	getList: () ->
 		@list
