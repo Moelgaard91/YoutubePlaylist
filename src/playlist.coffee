@@ -36,39 +36,15 @@ class Playlist
 		callback?()
 
 	playVideo: (tabId, callback) ->
-		return callback?() if do @isPlaying
-
+		return callback?() if @isPlaying()
 		@getTab tabId, (tab) =>
-			@port.postMessage action: "play"
+			sendMsg tabId, 'play'
 			callback?()
-			# chrome.tabs.executeScript tabId, 
-			# 	code: """
-			# 		var player = document.getElementById('movie_player');
-			# 		player.playVideo();
-			# 	"""
-			# , (res) =>
-			# 	@list[tabId].playing = true
-			# 	@current = @list[tabId]
-			# 	callback?()
 
 	stopVideo: (tabId, callback) ->
 		sendMsg tabId, 'stop'
 		@list[tabId].playing = false
 		@current = null if @current and @current.tabId is @list[tabId].tabId
-
-
-		#@getTab tabId, (tab) =>
-			# console.log tab
-			# chrome.tabs.executeScript tabId, 
-			# 	code: """
-			# 		var player = document.getElementById('movie_player');
-			# 		player.stopVideo();
-			# 	"""
-			# , (res) =>
-			# 	@list[tabId].playing = false
-			# 	@current = null
-			# 	console.log res
-			# 	callback?()
 
 	getTab: (tabId, callback) ->
 		chrome.tabs.get tabId, (tab) ->
@@ -81,9 +57,17 @@ class Playlist
 		return no
 
 	playNext: (callback) ->
+		nextId = @priority[1]
 		chrome.tabs.remove @current.tabId, () =>
-			nextId = @priority[0]
-			playVideo nextId, callback
+			@playVideo nextId, callback if nextId?
+
+	setPlaying: (tabId) ->
+		unless @isPlaying()
+			@current = @list[tabId]
+			@list[tabId].playing = true
+
+	setPaused: () ->
+		@current.playing = false if @current?
 
 	getList: () ->
 		@list

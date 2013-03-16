@@ -64,7 +64,7 @@ task 'build', 'Builds the project', (options) ->
 			i = 0
 			(next = () ->
 				file = files[i++]
-				return unless file?
+				return console.log "Done" unless file?
 				file = file.substring input.length+1
 				dir = path.dirname path.join output, file
 				mkdirp dir, () ->
