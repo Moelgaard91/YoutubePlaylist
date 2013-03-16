@@ -1,74 +1,42 @@
-Array::remove = (e) -> @[t..t] = [] if (t = @indexOf(e)) > -1
-
 class Playlist
 
-	list: {}
-	priority: []
-	current: null
-	port: null
+	_(@prototype).extend Event.prototype
 
-	#constructor: (@port) ->
-
-	#chrome.extension.onConnect.addListener (port) ->
-	#	console.log 'connection established from ' + port.name
-	#	@port = port
-	#	#port.postMessage('stop');
-
-	#	@port.onMessage.addListener (msg) ->
-	#		console.log 'playlist received message: ' + msg
-
-	#	@port.postMessage 'Greetings.'
-	#	@port.postMessage 'stop'
+	list     : {}
+	priority : []
+	current  : null
 
 	addVideo: (tabId, title, callback) ->
-		console.log '[playlist] Video added'
-		videoObject =
-			playing: false
-			tabId: tabId
-			title: title
-		@list[tabId] = videoObject
-		@priority.push tabId
-		callback? videoObject
+		if (v = @list[tabId])?
+			v.setPlaying false
+			v.setTitle title
+			callback? v
+		else
+			v = new Video playing: false, tabId: tabId, title: title
+			@list[tabId] = v
+			@priority.push tabId
+
+			callback? v
+			@publishEvent 'add:video', tabId, v
 
 	removeVideo: (tabId, callback) ->
 		delete @list[tabId] if @list[tabId]?
 		@priority.remove tabId
 		callback?()
+		@publishEvent 'remove:video', tabId
 
 	playVideo: (tabId, callback) ->
-		return callback?() if do @isPlaying
-
+		return callback?() if @isPlaying()
 		@getTab tabId, (tab) =>
-			@port.postMessage action: "play"
+			sendMsg tabId, 'play'
 			callback?()
-			# chrome.tabs.executeScript tabId, 
-			# 	code: """
-			# 		var player = document.getElementById('movie_player');
-			# 		player.playVideo();
-			# 	"""
-			# , (res) =>
-			# 	@list[tabId].playing = true
-			# 	@current = @list[tabId]
-			# 	callback?()
+			@publishEvent 'start:video', tabId
 
 	stopVideo: (tabId, callback) ->
 		sendMsg tabId, 'stop'
-		@list[tabId].playing = false
+		@list[tabId].setPlaying false
 		@current = null if @current and @current.tabId is @list[tabId].tabId
-
-
-		#@getTab tabId, (tab) =>
-			# console.log tab
-			# chrome.tabs.executeScript tabId, 
-			# 	code: """
-			# 		var player = document.getElementById('movie_player');
-			# 		player.stopVideo();
-			# 	"""
-			# , (res) =>
-			# 	@list[tabId].playing = false
-			# 	@current = null
-			# 	console.log res
-			# 	callback?()
+		@publishEvent 'pause:video', tabId
 
 	getTab: (tabId, callback) ->
 		chrome.tabs.get tabId, (tab) ->
@@ -81,9 +49,21 @@ class Playlist
 		return no
 
 	playNext: (callback) ->
+		nextId = @priority[1]
 		chrome.tabs.remove @current.tabId, () =>
-			nextId = @priority[0]
-			playVideo nextId, callback
+			@playVideo nextId, callback if nextId?
+			chrome.tabs.update nextId, selected: true
+
+	setPlaying: (tabId) ->
+		unless @isPlaying()
+			@current = @list[tabId]
+			@list[tabId].setPlaying true
+			@publishEvent 'start:video', tabId
+
+	setPaused: (tabId) ->
+		if @isPlaying() and (v = @list[tabId])?
+			v.playing = false
+			@publishEvent 'pause:video', tabId
 
 	getList: () ->
 		@list
@@ -91,13 +71,5 @@ class Playlist
 	getPriority: () ->
 		@priority
 
-	playSong = (priority) ->
-		console.log 'alright, playing song ' + priority
-		tabId = list[priority].tabId
-		list[priority].playing = true
-		current = list[priority]
-		sendMsg tabId, 'play'
-
 	sendMsg: (tabId, msg) ->
-		console.log '[playlist] Sending message: ' + msg + ' to tabId: ' + tabId
 		chrome.tabs.sendMessage tabId, msg

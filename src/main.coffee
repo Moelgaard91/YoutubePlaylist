@@ -1,5 +1,12 @@
 playlist = null
 
+STATE_UNSTARTED = -1
+STATE_ENDED = 0
+STATE_PLAYING = 1
+STATE_PAUSED = 2
+STATE_BUFFERING = 3
+STATE_VIDEO_CUED = 5
+
 playlist = new Playlist()
 
 stopVideo = () ->
@@ -11,23 +18,9 @@ stopVideo = () ->
 		"""
 	, (result) -> console.log result
 
-#chrome.webNavigation.onCompleted.addListener (details) ->
-#	chrome.tabs.executeScript null,
-#		code: """
-#			document.getElementById('movie_player').addEventListener("onStateChange", function(state) {
-#				console.log('state changed: ' + state);
-##		"""
-	#	(result) -> console.log result
-	
-	#	@playlist.addVideo details.tabId, () -> @playlist.stopVideo details.tabId
-	#,
-	#	url: [
-	#		hostSuffix: "youtube.com"
-	#		pathEquals: "/watch"
-	#	]
-
 chrome.tabs.onRemoved.addListener (tabId) ->
-	playlist.removeVideo tabId, () -> console.log do playlist.getList
+	playlist.removeVideo tabId, () ->
+		console.log playlist.getList()
 
 
 chrome.extension.onMessage.addListener (request, sender) ->
@@ -37,34 +30,38 @@ chrome.extension.onMessage.addListener (request, sender) ->
 	console.log 'Message received: ' + request + ', tabid: ' + sender.tab.id
 	console.log 'sender.tab.url: ' + sender.tab.url
 	
-	switch request
-		when 'Greetings' then do @playlist.addVideo sender.tab.id, sender.tab.title,  () -> @playlist.stopVideo sender.tab.id #chrome.tabs.executeScript sender.tab.id, {code:"console.log('niels!!!'); console.log('karsten!'); var player = document.getElementById('movie_player'); console.log(player); console.log(player.getPlayerState()); player.addEventListener('onStateChange', 'console.log(2+2)');"} 
-		when 'Statechange' then do console.log 'niels'
-		else console.error "unknown action: #{request.action}"
+	switch request.event
+		when 'Greetings'
+			@playlist.addVideo sender.tab.id, sender.tab.title,  () ->
+				@playlist.stopVideo sender.tab.id
+		when 'stateChange'
+			onStateChange request.state, sender.tab.id
 
-	#chrome.tabs.sendMessage sender.tab.id, 'Greetings'
-	#chrome.tabs.sendMessage sender.tab.id, 'stop'
+		else console.error "unknown event: #{request.event}"
+
+onStateChange = (state, tabId) ->
+	switch state
+		when STATE_UNSTARTED
+			console.log "STATE_UNSTARTED"
+		when STATE_PLAYING
+			console.log "STATE_PLAYING"
+			playlist.setPlaying tabId
+		when STATE_PAUSED
+			console.log "STATE_PAUSED"
+			playlist.setPaused()
+		when STATE_BUFFERING
+			console.log "STATE_BUFFERING"
+		when STATE_ENDED
+			console.log "STATE_ENDED"
+			playlist.playNext()
+		when STATE_VIDEO_CUED
+			console.log "STATE_VIDEO_CUED"
 
 sendMsg = (tabId, msg) ->
 	chrome.tabs.sendMessage tabId, msg
-
-niels = () ->
-	alert('niels')
 
 getPlaylist = () ->
 	return playlist.getList()
 
 getPriority = () ->
 	return playlist.getPriority()
-
-playSong = (priority) ->
-	console.log 'playing song with priority: ' + priority
-
-#chrome.extension.onConnect.addListener (port) ->
-#	#console.assert port.name is "playlist"
-#	console.log 'main - connection established'
-#	port.postMessage('Greetings from main')
-#	port.postMessage('stop')
-#	#playlist = new playlist port
-#	#port.onMessage.addListener (msg) ->
-#	#	playlist.playNext() if msg.state is 0
