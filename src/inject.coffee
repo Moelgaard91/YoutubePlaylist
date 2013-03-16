@@ -1,8 +1,4 @@
-console.log "contentScript loaded"
-console.log "document state: " + document.readyState
-
 player = document.getElementById('movie_player')
-console.log "player loaded"
 
 initListeners = () ->
 	state = null
@@ -11,8 +7,6 @@ initListeners = () ->
 	chrome.extension.sendMessage event: 'Greetings'
 
 	chrome.extension.onMessage.addListener (request, sender) ->
-		console.log 'Message received: ' + request
-		console.log 'sender.tab.url: ' + sender.tab.url
 		return unless request?
 		switch request
 			when 'stop' then do player.stopVideo
