@@ -49,10 +49,14 @@ class Playlist
 		return no
 
 	playNext: (callback) ->
+		currentId = @current.tabId
 		nextId = @priority[1]
-		chrome.tabs.remove @current.tabId, () =>
-			@playVideo nextId, callback if nextId?
-			chrome.tabs.update nextId, selected: true
+		chrome.tabs.get currentId, (tab) =>
+			isActive = tab.selected
+			chrome.tabs.remove currentId, () =>
+				@playVideo nextId, callback if nextId?
+				if isActive
+					chrome.tabs.update nextId, selected: true
 
 	setPlaying: (tabId) ->
 		unless @isPlaying()

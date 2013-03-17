@@ -1,4 +1,4 @@
-player = document.getElementById('movie_player')
+player = document.getElementById 'movie_player'
 
 initListeners = () ->
 	state = null

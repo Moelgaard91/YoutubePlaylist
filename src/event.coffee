@@ -15,4 +15,4 @@ class Event
 		@_events[event].push callback
 
 	unsubscribeEvent: (event, callback) ->
-		@_events[event].remove callback if @_events[event]?
+		@_events[event].remove callback if @_events[event]?.remove?

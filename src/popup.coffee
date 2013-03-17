@@ -11,7 +11,9 @@ document.addEventListener 'DOMContentLoaded', () ->
 		a['innerHTML']  = videoObject.title
 		
 		a.addEventListener 'click', (e) ->
-			playlist.playVideo a['data-tabId']
+			tabId = a['data-tabId']
+			playlist.playVideo tabId
+			chrome.tabs.update tabId, selected: true
 		
 		li = document.createElement 'li'
 		li.appendChild a
