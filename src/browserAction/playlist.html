@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+	<title>YoutubePlaylist</title>
+	<link rel="stylesheet" type="text/css" href="bootstrap.css" />
+	<style>
+		body {
+			min-width: 160px;
+			overflow-x: hidden;
+			max-height: 500px;
+		}
+		
+		#playlist {
+			list-style: none;
+			display: block;
+			position: static;
+			border: none;
+			padding: 0;
+			margin: 0;
+			-webkit-border-radius: none;
+			border-radius: none;
+			-webkit-box-shadow: none;
+			box-shadow: none;
+		}
+
+		#playlist > li> a:not(.empty) {
+			padding-right: 2px;
+		}
+
+		#playlist > li >a:hover {
+			text-decoration: none;
+		}
+
+		#playlist > li > a > button {
+			margin: -1px 0px 0px 12px;
+		}
+	</style>
+
+</head>
+<body>
+
+	<div class="dropdown clearfix" id="playlist-container">
+		<ul class="dropdown-menu" id="playlist"></ul>
+	</div>
+	
+	<script src="playlist.js" type="text/javascript"></script>
+</body>
+</html>

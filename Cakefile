@@ -57,7 +57,7 @@ compileCoffee = (cont) ->
 task 'build', 'Builds the project', (options) ->
 	console.log "Building project"
 	compileCoffee () ->
-		ext = [".js",".html", ".png", ".json"]
+		ext = [".js", ".css", ".html", ".png", ".gif", ".json"]
 		console.log "Copying files: ", ext
 		fs.find input, ext, (err, files) ->
 			return console.error "fs.find error: ", err if err?
