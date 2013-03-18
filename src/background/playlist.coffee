@@ -31,7 +31,7 @@ class Playlist
 	# @param string title
 	# @param [function callback] (err, video)
 	# @return void
-	# @event add:video
+	# @event add:video, change:video
 	###
 	addVideo: (tabId, title, callback) ->
 		err = null
@@ -39,13 +39,14 @@ class Playlist
 			video.setPlaying false
 			video.setTitle title
 			callback? err, video
+			@publishEvent 'change:video', video
 		else
 			video = new Video playing: false, tabId: tabId, title: title
 			@list[tabId] = video
 			@priority.push tabId
 
 			callback? err, video
-			@publishEvent 'add:video', tabId, video
+			@publishEvent 'add:video', video
 
 	###
 	# Removes a video from the playlist
@@ -56,10 +57,10 @@ class Playlist
 	###
 	removeVideo: (tabId, callback) ->
 		err = null
-		delete @list[tabId] if @list[tabId]?
+		delete @list[tabId] if (video = @list[tabId])?
 		@priority.remove tabId
 		callback? err
-		@publishEvent 'remove:video', tabId
+		@publishEvent 'remove:video', video
 
 	###
 	# Play video - sends a play event to the video player of the tabId
@@ -69,8 +70,9 @@ class Playlist
 	# @event start:video
 	###
 	playVideo: (tabId, callback) ->
-		sendMsg tabId, 'play', callback
-		@publishEvent 'start:video', tabId
+		callback msg: "The is no video on tabId: #{tabId}" unless (video = @list[tabId])?
+		@sendMsg tabId, 'play', callback
+		@publishEvent 'start:video', video
 
 	###
 	# Stop video - sends a stop event to the video player of the tabId
@@ -79,13 +81,11 @@ class Playlist
 	# @event pause:video
 	###
 	stopVideo: (tabId, callback) ->
-		err = null
-		sendMsg tabId, 'stop'
 		return callback? msg: "There is no video on tabId: #{tabId}" unless (video = @list[tabId])?
+		@sendMsg tabId, 'stop', callback
 		video.setPlaying false
 		@current = null if @current and @current.tabId is video.tabId
-		@publishEvent 'pause:video', tabId
-		callback? err
+		@publishEvent 'pause:video', video
 
 	###
 	# Get tab by id
@@ -94,10 +94,9 @@ class Playlist
 	# @return void
 	###
 	getTab: (tabId, callback) ->
-		err = null
 		chrome.tabs.get tabId, (tab) ->
 			callback msg: "Tab not found: #{tabId}" unless tab?
-			callback err, tab
+			callback null, tab
 
 	###
 	# Whether there is a video in the playlist that is playing.
@@ -123,7 +122,7 @@ class Playlist
 				@playVideo nextId, callback if nextId?
 				if isActive
 					chrome.tabs.update nextId, selected: true
-				return callback?()
+				return callback? null
 
 	###
 	# Set the state of a tab to be playing, this is used when a user manually has started a video,
@@ -133,10 +132,12 @@ class Playlist
 	# @event start:video
 	###
 	setPlaying: (tabId) ->
+		return unless (video = @list[tabId])?
 		@stopVideo @current.tabId if @current? and @current.tabId isnt tabId
-		@current = @list[tabId]
-		@list[tabId].setPlaying true
-		@publishEvent 'start:video', tabId
+		@current = video
+		wasPlaying = video.playing
+		video.setPlaying true
+		@publishEvent 'start:video', video unless wasPlaying
 
 	###
 	# Set the state of a tab to be paused, this is used when a user manually has paused a video,
@@ -148,7 +149,7 @@ class Playlist
 	setPaused: (tabId) ->
 		if (video = @list[tabId])?
 			video.setPlaying false
-			@publishEvent 'pause:video', tabId
+			@publishEvent 'pause:video', video
 
 	###
 	# Get the internal list.

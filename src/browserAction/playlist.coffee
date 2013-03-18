@@ -70,14 +70,15 @@ document.addEventListener 'DOMContentLoaded', () ->
 		a  = document.createElement 'a'
 		a['data-tabId'] = tabId
 		a['href']       = '#'
-		a['innerHTML']  = video.title
 		
 		if tabId isnt -1
+			a['innerHTML']  = video.getFormattedTitle()
 			a.appendChild createControls video
 			a.addEventListener 'click', (e) ->
 				tabId = a['data-tabId']
 				chrome.tabs.update tabId, selected: true
 		else
+			a['innerHTML'] = video.title
 			a['className'] = "empty"
 		
 		li = document.createElement 'li'

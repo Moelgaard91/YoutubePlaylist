@@ -51,3 +51,13 @@ class Video
 	setTitle: (title) ->
 		@title = title
 		@publishEvent 'change:title', title
+
+	###
+	# Get the formatted title, Foo Fighters - The Pretender - Youtube
+	# becomes: Foo Fighters - The Pretender
+	# @return string
+	###
+	getFormattedTitle: () ->
+		youtubeString = " - YouTube"
+		return @title if @title.length < youtubeString.length
+		return @title.substring 0, (@title.length - youtubeString.length)
