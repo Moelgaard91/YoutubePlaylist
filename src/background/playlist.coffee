@@ -26,6 +26,11 @@ class Playlist
 	current  : null
 
 	###
+	# @var integer the length of the playlist
+	###
+	length: 0
+
+	###
 	# Adds a video in paused mode, to the playlist
 	# @param integer tabId
 	# @param string title
@@ -44,7 +49,7 @@ class Playlist
 			video = new Video playing: false, tabId: tabId, title: title
 			@list[tabId] = video
 			@priority.push tabId
-
+			@length = @priority.length
 			callback? err, video
 			@publishEvent 'add:video', video
 
@@ -59,6 +64,7 @@ class Playlist
 		err = null
 		delete @list[tabId] if (video = @list[tabId])?
 		@priority.remove tabId
+		@length = @priority.length
 		callback? err
 		@publishEvent 'remove:video', video
 
@@ -101,6 +107,7 @@ class Playlist
 	playNext: (callback) ->
 		currentId = @current.tabId
 		nextId = @priority[1]
+		return unless nextId?
 		chrome.tabs.get currentId, (tab) =>
 			return callback? msg: "Tab not found: #{currentId}" unless tab?
 			isActive = tab.selected
@@ -121,7 +128,7 @@ class Playlist
 		if newIndex < 0
 			return callback? msg: "The new index has to be greater than 0, got: #{newIndex}", @priority
 		
-		if newIndex > (maxIndex = @priority.length - 1)
+		if newIndex > (maxIndex = @length.length - 1)
 			return callback? msg: "Index out of bounce, max index: #{maxIndex}", @priority
 		
 		if (oldIndex = _.indexOf @priority, tabId) is -1

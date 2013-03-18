@@ -93,8 +93,8 @@ chrome.extension.onMessage.addListener (request, sender) ->
 	return unless request?
 	switch request.event
 		when 'Greetings'
-			@playlist.addVideo sender.tab.id, sender.tab.title,  () ->
-				@playlist.stopVideo sender.tab.id
+			playlist.addVideo sender.tab.id, sender.tab.title,  () ->
+				playlist.stopVideo sender.tab.id unless playlist.length is 1
 		when 'stateChange'
 			onStateChange request.state, sender.tab.id
 		else console.error "unknown event: #{request.event}"

@@ -110,14 +110,15 @@ createPlaylistItem = (tabId, video) ->
 initSortable = () ->
 	$('#playlist').sortable
 		axis: 'y'
-		containment: "parent"
 		forceHelperSize: yes
 		forcePlaceholderSize: yes
-		cancel: ".active, button, icon"
-		items: "> li"
+		containment: "window"
+		cancel: "button, icon"
+		items: ">li:not(.active)"
 		opacity: .6
 		distance: 5
 		placeholder: "placeholder"
+		tolerange: "pointer"
 		start: (event, ui) ->
 			# add the necessary HTML and classes to the placeholder
 			# in order to render the list correctly when moving elements around.
@@ -125,7 +126,7 @@ initSortable = () ->
 		update: (event, ui) ->
 			# get a list of tab id, in the order
 			# they are in the DOM right now.
-			sortedItems = for a in $(@).find("> li > a")
+			sortedItems = for a in $(@).find('>li>a')
 				parseInt a.getAttribute 'data-tabId'
 			
 			# get the tab id of the moved item.
