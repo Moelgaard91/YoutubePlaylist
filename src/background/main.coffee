@@ -43,19 +43,19 @@ sendMsg = (tabId, msg) ->
 # 	@option integer id
 # 	@option string title
 # 	@option string body
-# 	@option [ integer timeout = 3000 ]
+# 	@option [ integer timeout = 5000 ]
 # 	@option [ boolean autoShow = true ]
 # @return Notification
 ###
 showDesktopNotification = (options) ->
 	defaults =
-		timeout: 3000
+		timeout: 5000
 		autoShow: true
 
 	# extending defaults with options.
 	options = _.extend defaults, options
 	# throw error if the required options isn't defined.
-	throw new Error unless options.id? and options.title? and options.body
+	throw new Error if not options.id? or not options.title? or not options.body?
 	
 	# returns if the desktop notification is already showing.
 	return if desktopNotifications[options.id]?
