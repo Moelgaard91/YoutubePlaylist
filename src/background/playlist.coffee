@@ -103,9 +103,7 @@ class Playlist
 	# @return boolean
 	###
 	isPlaying: () ->
-		for data of @list
-			return yes if data.playing
-		return no
+		_.any @list, (e) -> e.playing
 
 	###
 	# Play the next video in the playlist.
@@ -125,6 +123,30 @@ class Playlist
 				return callback? null
 
 	###
+	# Move a video to a new index in the priority
+	# @param integer tabId
+	# @param integer newIndex
+	# @param [ function callback ] (err, priorityList)
+	# @return void
+	###
+	moveVideo: (tabId, newIndex, callback) ->
+		if newIndex < 0
+			return callback? msg: "The new index has to be greater than 0, got: #{newIndex}", @priority
+		if newIndex > (maxIndex = @priority.length - 1)
+			return callback? msg: "Index out of bounce, max index: #{maxIndex}", @priority
+		oldIndex = _.indexOf @priority, tabId
+		if oldIndex is -1
+			return callback? msg: "The tabId doesn't exist in the playlist priority: #{tabId}", @priority
+
+		if newIndex >= @priority.length
+			k = newIndex - @priority.length
+			while (k--) + 1
+				@priority.push undefined
+		@priority.splice newIndex, 0, (@priority.splice oldIndex, 1)[0]
+		callback? null, @priority
+		@publishEvent 'move:video', @priority
+
+	###
 	# Set the state of a tab to be playing, this is used when a user manually has started a video,
 	# this is called to keep track of the state internally.
 	# @param integer tabId
@@ -133,7 +155,13 @@ class Playlist
 	###
 	setPlaying: (tabId) ->
 		return unless (video = @list[tabId])?
-		@stopVideo @current.tabId if @current? and @current.tabId isnt tabId
+		
+		if @current? and @current.tabId isnt tabId
+			@stopVideo @current.tabId
+		
+		if tabId isnt @priority[0]
+			@moveVideo tabId, 0
+		
 		@current = video
 		wasPlaying = video.playing
 		video.setPlaying true

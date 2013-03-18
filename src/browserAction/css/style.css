@@ -22,6 +22,10 @@ body {
 	padding-right: 2px;
 }
 
+#playlist > .placeholder {
+	opacity: .1;
+}
+
 #playlist > li >a:hover {
 	text-decoration: none;
 }
