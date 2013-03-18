@@ -51,12 +51,16 @@ showDesktopNotification = (options) ->
 	defaults =
 		timeout: 3000
 		autoShow: true
-		onClick: () ->
 
+	# extending defaults with options.
 	options = _.extend defaults, options
+	# throw error if the required options isn't defined.
 	throw new Error unless options.id? and options.title? and options.body
+	
+	# returns if the desktop notification is already showing.
 	return if desktopNotifications[options.id]?
 
+	# creating desktop notification object.
 	notification = webkitNotifications.createNotification 'notification/img/logo_48.png', options.title, options.body
 	
 	# handling duplicates problem of desktop notification
@@ -64,12 +68,14 @@ showDesktopNotification = (options) ->
 	notification.onclose = () ->
 		delete desktopNotifications[options.id]
 
+	# auto show/close.
 	if options.autoShow
 		notification.show()
 		if options.timeout > 0
 			setTimeout () ->
 				notification.close()
 			, options.timeout
+
 	return notification
 
 # listener that removes a video from the playlist, if it's tab is closed.
@@ -93,23 +99,25 @@ chrome.extension.onMessage.addListener (request, sender) ->
 			onStateChange request.state, sender.tab.id
 		else console.error "unknown event: #{request.event}"
 
+# creates desktop notification, when something important happens.
+# and hook up click handlers to activate the tab where the video is.
 playlist.subscribeEvent 'add:video', (video) ->
-	showDesktopNotification
+	notification = showDesktopNotification
 		id: "add:video:#{video.tabId}"
 		title: "Video added to playlist"
 		body: video.getFormattedTitle()
-	.onclick = () -> chrome.tabs.update video.tabId, selected: true
+	notification.onclick = () -> chrome.tabs.update video.tabId, selected: true
 
 playlist.subscribeEvent 'change:video', (video) ->
-	showDesktopNotification
+	notification = showDesktopNotification
 		id: "change:video:#{video.tabId}"
 		title: "Video updated in playlist"
 		body: video.getFormattedTitle()
-	.onclick = () -> chrome.tabs.update video.tabId, selected: true
+	notification.onclick = () -> chrome.tabs.update video.tabId, selected: true
 
 playlist.subscribeEvent 'start:video', (video) ->
-	showDesktopNotification
+	notification = showDesktopNotification
 		id: "start:video:#{video.tabId}"
 		title: "Video now playing"
 		body: video.getFormattedTitle()
-	.onclick = () -> chrome.tabs.update video.tabId, selected: true
+	notification.onclick = () -> chrome.tabs.update video.tabId, selected: true
