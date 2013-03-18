@@ -21,7 +21,7 @@ class Playlist
 	priority : []
 
 	###
-	# @var Video current video object
+	# @var Video currently selected video object
 	###
 	current  : null
 
@@ -88,22 +88,10 @@ class Playlist
 		@publishEvent 'pause:video', video
 
 	###
-	# Get tab by id
-	# @param integer tabId
-	# @param function callback (err, tab)
-	# @return void
-	###
-	getTab: (tabId, callback) ->
-		chrome.tabs.get tabId, (tab) ->
-			callback msg: "Tab not found: #{tabId}" unless tab?
-			callback null, tab
-
-	###
 	# Whether there is a video in the playlist that is playing.
 	# @return boolean
 	###
-	isPlaying: () ->
-		_.any @list, (e) -> e.playing
+	isPlaying: () -> _.any @list, (e) -> e.playing
 
 	###
 	# Play the next video in the playlist.
@@ -132,10 +120,11 @@ class Playlist
 	moveVideo: (tabId, newIndex, callback) ->
 		if newIndex < 0
 			return callback? msg: "The new index has to be greater than 0, got: #{newIndex}", @priority
+		
 		if newIndex > (maxIndex = @priority.length - 1)
 			return callback? msg: "Index out of bounce, max index: #{maxIndex}", @priority
-		oldIndex = _.indexOf @priority, tabId
-		if oldIndex is -1
+		
+		if (oldIndex = _.indexOf @priority, tabId) is -1
 			return callback? msg: "The tabId doesn't exist in the playlist priority: #{tabId}", @priority
 
 		if newIndex >= @priority.length
@@ -183,8 +172,7 @@ class Playlist
 	# Get the internal list.
 	# @return object { tabId: Video }
 	###
-	getList: () ->
-		@list
+	getList: () -> @list
 
 	###
 	# Get the priority list, which contains an array of tabIds,
@@ -192,8 +180,7 @@ class Playlist
 	# index 1 is the next video.
 	# @return array<integer>
 	###
-	getPriority: () ->
-		@priority
+	getPriority: () -> @priority
 
 	###
 	# Send a message to a tab.
