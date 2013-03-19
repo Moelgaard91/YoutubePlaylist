@@ -108,8 +108,13 @@ class Playlist
 	playNext: (callback) ->
 		currentId = @current.tabId
 		nextId = @priority[1]
+		
 		# returns if there is no next video.
-		return unless nextId?
+		unless nextId?
+			return @removeVideo currentId, (err) ->
+				console.error err if err?
+
+		# get the current tab, to determine, if it is active
 		chrome.tabs.get currentId, (tab) =>
 			# return if the tab couldn't be found.
 			return callback? msg: "Tab not found: #{currentId}" unless tab?

@@ -1,5 +1,9 @@
 # Changelog for YouTube Playlist
 
+### Version 1.0.3
+
+* Fixed: The last item is removed from the list when the playlist is finished, but keeps the tab open, so the user has the oppotunity to add more videos.
+
 ### Version 1.0.2 - 2013-03-19
 
 * Rewrote the browserAction script to use jQuery all over the place for DOM traversal and manipulation, this made the code a bit cleaner, and more consistent.
