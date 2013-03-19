@@ -64,7 +64,7 @@ class Playlist
 			@length = @priority.length
 			if @length > @maxOpenVideoTabs
 				video.setPending true
-				chrome.tabs.remove tab.id,
+				chrome.tabs.remove tab.id
 			callback? err, video
 			@publishEvent 'add:video', video
 
@@ -77,8 +77,9 @@ class Playlist
 	# @event update:video
 	###
 	updateVideo: (id, title, videoUrl, callback) ->
-		@list[id].setTitle title
-		@list[id].setVideoUrl videoUrl
+		return callback? msg: "There is no video with id: #{id}" unless (video = @list[id])?
+		video.setTitle title
+		video.setVideoUrl videoUrl
 		callback? null, video
 		@publishEvent 'update:video', video
 

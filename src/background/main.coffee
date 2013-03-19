@@ -100,7 +100,7 @@ playlist.subscribeEvent 'add:video', (video) ->
 		body: video.getFormattedTitle()
 	notification?.onclick = () -> chrome.tabs.update video.tabId, selected: true
 
-playlist.subscribeEvent 'change:video', (video) ->
+playlist.subscribeEvent 'update:video', (video) ->
 	notification = showDesktopNotification
 		id: "update:video:#{video.tabId}"
 		title: "Video updated in playlist"
