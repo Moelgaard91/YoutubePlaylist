@@ -18,6 +18,17 @@ body {
 	box-shadow: none;
 }
 
+#playlist > li.active > a,
+#playlist > li.active > a:hover {
+	background-color: #C20000;
+	background-image: -webkit-linear-gradient(top,#C00,#B30000);
+}
+
+#playlist > li > a:hover {
+	background-color: #B6B6B6;
+	background-image: -webkit-linear-gradient(top, #8D8D8D, #B3B3B3);
+}
+
 #playlist > li> a:not(.empty) {
 	padding-right: 2px;
 }

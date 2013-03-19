@@ -39,8 +39,9 @@ class Video
 	# @event change:playing
 	###
 	setPlaying: (state) ->
+		prevState = @playing
 		@playing = state
-		@publishEvent 'change:playing', state
+		@publishEvent 'change:playing', state unless prevState is state
 
 	###
 	# Sets the title of the video
@@ -49,8 +50,9 @@ class Video
 	# @event change:title
 	###
 	setTitle: (title) ->
+		prevTitle = @title
 		@title = title
-		@publishEvent 'change:title', title
+		@publishEvent 'change:title', title unless prevTitle is title
 
 	###
 	# Get the formatted title, Foo Fighters - The Pretender - Youtube

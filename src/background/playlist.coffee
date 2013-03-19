@@ -107,15 +107,20 @@ class Playlist
 	playNext: (callback) ->
 		currentId = @current.tabId
 		nextId = @priority[1]
+		# returns if there is no next video.
 		return unless nextId?
 		chrome.tabs.get currentId, (tab) =>
+			# return if the tab couldn't be found.
 			return callback? msg: "Tab not found: #{currentId}" unless tab?
+			# save the select state for the tab.
 			isActive = tab.selected
+			# removing the tab of the newly finished video.
 			chrome.tabs.remove currentId, () =>
-				@playVideo nextId, callback if nextId?
-				if isActive
-					chrome.tabs.update nextId, selected: true
-				return callback? null
+				# play the next video
+				@playVideo nextId, () ->
+					if isActive
+						chrome.tabs.update nextId, selected: true
+					return callback? null
 
 	###
 	# Move a video to a new index in the priority
@@ -160,8 +165,10 @@ class Playlist
 		
 		@current = video
 		wasPlaying = video.playing
-		video.setPlaying true
-		@publishEvent 'start:video', video unless wasPlaying
+
+		unless wasPlaying
+			video.setPlaying true
+			@publishEvent 'start:video', video
 
 	###
 	# Set the state of a tab to be paused, this is used when a user manually has paused a video,

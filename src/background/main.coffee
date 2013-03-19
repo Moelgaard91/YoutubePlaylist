@@ -55,7 +55,7 @@ showDesktopNotification = (options) ->
 	# extending defaults with options.
 	options = _.extend defaults, options
 	# throw error if the required options isn't defined.
-	throw new Error if not options.id? or not options.title? or not options.body?
+	return console.error "id, title and body has to be defined" if not options.id? or not options.title? or not options.body?
 	
 	# returns if the desktop notification is already showing.
 	return if desktopNotifications[options.id]?
