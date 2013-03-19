@@ -1,8 +1,11 @@
 # Changelog for YouTube Playlist
 
-### Version 1.0.3
+### Version 1.0.3 - 2013-03-19
 
 * Fixed: The last item is removed from the list when the playlist is finished, but keeps the tab open, so the user has the oppotunity to add more videos.
+* Rewritten the playlist, to not use tabId as map look up, but our own object counter instead, this is a preparation for implementing tab rotation, in order to support more than 20 items on the playlist, due to flash is crashing when have to many open instances.
+* Added the video url on video object; preparation for tab restore in tab rotation.
+* Made some of the work internally in the playlist class more abstract.
 
 ### Version 1.0.2 - 2013-03-19
 

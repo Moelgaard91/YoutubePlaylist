@@ -29,15 +29,6 @@ onStateChange = (state, tabId) ->
 		# when STATE_VIDEO_CUED 
 
 ###
-# Send a message to the content script of a given tab.
-# @param integer tabId
-# @param mixed msg
-# @return void
-###
-sendMsg = (tabId, msg) ->
-	chrome.tabs.sendMessage tabId, msg
-
-###
 # Create desktop notification
 # @param object options
 # 	@option integer id
@@ -80,8 +71,9 @@ showDesktopNotification = (options) ->
 
 # listener that removes a video from the playlist, if it's tab is closed.
 chrome.tabs.onRemoved.addListener (tabId) ->
-	playlist.removeVideo tabId, () ->
-		playlist.getList()
+	video = playlist.getVideoByTabId tabId
+	return console.error "There was no video found on tabId: #{tabId}" unless video?
+	playlist.removeVideo tabId unless video.pending
 
 # initialize event listeners of the message channels
 # between the content scripts, that is injected into the DOM.
@@ -93,8 +85,8 @@ chrome.extension.onMessage.addListener (request, sender) ->
 	return unless request?
 	switch request.event
 		when 'Greetings'
-			playlist.addVideo sender.tab.id, sender.tab.title,  () ->
-				playlist.stopVideo sender.tab.id unless playlist.length is 1
+			playlist.addVideo sender.tab,  (err, video) ->
+				playlist.stopVideo video.id unless playlist.length is 1
 		when 'stateChange'
 			onStateChange request.state, sender.tab.id
 		else console.error "unknown event: #{request.event}"
@@ -110,7 +102,7 @@ playlist.subscribeEvent 'add:video', (video) ->
 
 playlist.subscribeEvent 'change:video', (video) ->
 	notification = showDesktopNotification
-		id: "change:video:#{video.tabId}"
+		id: "update:video:#{video.tabId}"
 		title: "Video updated in playlist"
 		body: video.getFormattedTitle()
 	notification?.onclick = () -> chrome.tabs.update video.tabId, selected: true

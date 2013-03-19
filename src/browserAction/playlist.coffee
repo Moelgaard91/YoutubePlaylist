@@ -4,38 +4,38 @@ playlist = chrome.extension.getBackgroundPage().playlist
 # find the the playlist ul DOM element.
 $DOMPlaylist = $('#playlist')
 
-# map from tabId to the corresponding jQuery li element.
+# map from id to the corresponding jQuery li element.
 listItems = {}
-# map from tabId to the corresponding jQuery a element.
+# map from id to the corresponding jQuery a element.
 links = {}
-# map from tabId to the corresponding jQuery button element.
+# map from id to the corresponding jQuery button element.
 buttons = {}
-# map from tabId to the corresponding jQuery icon element.
+# map from id to the corresponding jQuery icon element.
 icons = {}
 
 ###
 # Sets the control button's state of a playlist item.
-# @param integer tabId
+# @param integer id
 # @param boolean state
 # @return void
 ###
-setControlButtonState = (tabId, state) ->
+setControlButtonState = (id, state) ->
 	if state
-		icons[tabId][0]['className'] = 'icon-pause'
+		icons[id][0]['className'] = 'icon-pause'
 	else
-		icons[tabId][0]['className'] = 'icon-play'
+		icons[id][0]['className'] = 'icon-play'
 
 ###
 # Sets the playing state of the li element.
-# @param integer
+# @param integer id
 # @param boolean state
 # @return void
 ###
-setItemState = (tabId, state) ->
+setItemState = (id, state) ->
 	if state
-		listItems[tabId][0]['className'] = 'active'
+		listItems[id][0]['className'] = 'active'
 	else
-		listItems[tabId][0]['className'] = ''
+		listItems[id][0]['className'] = ''
 
 
 ###
@@ -49,13 +49,13 @@ createControls = (video) ->
 		.addClass('btn btn-mini pull-right')
 		.data('video', video)
 	# update buttons map
-	buttons[video.tabId] = $btn
+	buttons[video.id] = $btn
 
 	# save the video element on the icon
 	$i = $('<icon />')
 		.data('video', video)
 	# update icons map
-	icons[video.tabId] = $i
+	icons[video.id] = $i
 	# setting the current state of the button.
 	$i.addClass if video.playing then 'icon-pause' else 'icon-play'
 	# append icon to button.
@@ -67,8 +67,8 @@ createControls = (video) ->
 	#     on which the event occured.
 	video.subscribeEvent 'change:playing', (state) ->
 		# set the new state of the control button.
-		setControlButtonState @tabId, state
-		setItemState @tabId, state
+		setControlButtonState @id, state
+		setItemState @id, state
 	
 	# listens to when the control button is clicked,
 	# to either start or stop the video.
@@ -78,19 +78,19 @@ createControls = (video) ->
 		video = $(@).data 'video'
 
 		if (state = video.playing)
-			playlist.stopVideo video.tabId
+			playlist.stopVideo video.id
 		else
-			playlist.playVideo video.tabId
+			playlist.playVideo video.id
 
 		# set the current state of the control button.
-		setControlButtonState video.tabId, (not state)
+		setControlButtonState video.id, (not state)
 		return false
 
 	return $btn
 
 ###
 # Create a playlist item.
-# @param integer tabId
+# @param integer id
 # @param Video video
 # @return jQuery
 ###
@@ -100,18 +100,18 @@ createPlaylistItem = (video) ->
 		.attr('href', '#')
 		.data('video', video)
 	# update links map.
-	links[video.tabId] = $a
+	links[video.id] = $a
 
 	# creating the list item and add the video object on the list.
 	$li = $('<li />').data('video', video)
 	# update listItems map.
-	listItems[video.tabId] = $li
+	listItems[video.id] = $li
 	
 	# append a tag on list item.
 	$li.append $a
 
-	# if the video object isn't a special case, hence -1 tabId
-	if video.tabId isnt -1
+	# if the video object isn't a special case, hence -1 id
+	if video.id isnt -1
 		# setting listItem active if the video is playing.
 		$li.addClass 'active' if video.playing
 		# insert the title.
@@ -153,26 +153,26 @@ initSortable = () ->
 			# get a list of tab id, in the order
 			# they are in the DOM right now.
 			sortedItems = for a in $(@).find('>li>a')
-				$(a).data('video').tabId
+				$(a).data('video').id
 			
 			# get the tab id of the moved item.
-			tabId = ui.item.data('video').tabId
+			id = ui.item.data('video').id
 			
 			# get the new index of the item we just moved.
-			newIndex = sortedItems.indexOf tabId
+			newIndex = sortedItems.indexOf id
 			if newIndex is 0 and playlist.isPlaying()
 				# you cannot move an item above a playing item.
 				# which always will be at the top of the list.
 				return $(@).sortable 'cancel'
 
-			# if the tabId wasn't to be found,
+			# if the id wasn't to be found,
 			# then something's wrong.
 			if newIndex is -1
 				# re-render the playlist if a move goes wrong
 				# because the damage is unrecoverable.
 				renderPlaylist()
 			else
-				playlist.moveVideo tabId, newIndex, (err) ->
+				playlist.moveVideo id, newIndex, (err) ->
 					# same story down here.
 					renderPlaylist() if err?
 ###
@@ -196,7 +196,7 @@ renderPlaylist = (clear = true) ->
 
 	# creating empty playlist element.
 	if playlist.getPriority().length is 0
-		$DOMPlaylist.append createPlaylistItem tabId: -1, title: "The playlist is empty."
+		$DOMPlaylist.append createPlaylistItem id: -1, title: "The playlist is empty."
 	else
 		for id in playlist.getPriority()
 			video = playlist.getList()[id]
@@ -205,12 +205,12 @@ renderPlaylist = (clear = true) ->
 		initSortable()
 
 # listens to when the a video is added to the playlist.
-playlist.subscribeEvent 'add:video', (tabId, videoObject) ->
+playlist.subscribeEvent 'add:video', (video) ->
 	# TODO: handle this better, then just re-render every time something happens.
 	renderPlaylist()
 
 # listens to when a video is removed to the playlist.
-playlist.subscribeEvent 'remove:video', (tabId) ->
+playlist.subscribeEvent 'remove:video', (video) ->
 	# TODO: handle this better, then just re-render every time something happens.
 	renderPlaylist()
 
