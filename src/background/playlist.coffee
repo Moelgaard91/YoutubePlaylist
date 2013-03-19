@@ -78,7 +78,6 @@ class Playlist
 	playVideo: (tabId, callback) ->
 		callback msg: "The is no video on tabId: #{tabId}" unless (video = @list[tabId])?
 		@sendMsg tabId, 'play'
-		@current = video
 		callback? null
 		@publishEvent 'start:video', video
 
