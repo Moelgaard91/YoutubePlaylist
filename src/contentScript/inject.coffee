@@ -41,7 +41,7 @@ initListeners = () ->
 # When the player is loaded, hook up events.
 counter = 0
 isYoutubePlayerLoaded = () ->
-	return console.error "YoutubePlayer is never loaded after 30 tries" if counter >= 100
+	return console.error "YoutubePlayer is never loaded after 10 seconds" if counter >= 100
 	if player.getPlayerState?
 		return initListeners()
 	else
