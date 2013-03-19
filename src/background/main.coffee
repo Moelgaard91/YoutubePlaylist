@@ -61,7 +61,7 @@ showDesktopNotification = (options) ->
 	return if desktopNotifications[options.id]?
 
 	# creating desktop notification object.
-	notification = webkitNotifications.createNotification 'notification/img/logo_48.png', options.title, options.body
+	notification = webkitNotifications.createNotification 'browserAction/img/logo_48.png', options.title, options.body
 	
 	# handling duplicates problem of desktop notification
 	desktopNotifications[options.id] = notification

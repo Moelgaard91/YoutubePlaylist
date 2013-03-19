@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Youtube Playlist",
-	"description": "This extension helps you manage playback of YouTube videos, creating playlist based on the tabs you have open, this way the videos is preloaded and thus makes the shifting between videos almost gapless.",
+	"description": "This extension helps you manage playback of YouTube videos, creating playlist based on the tabs you have open.",
 	"version": "1.0.0",
 	"background": {
 		"scripts": [
@@ -13,8 +13,10 @@
 		]
 	},
 	"icons": {
-		"16": "browserAction/img/logo_20.gif",
-		"48": "notification/img/logo_48.png"
+		"16": "browserAction/img/logo_16.png",
+		"24": "browserAction/img/logo_24.png",
+		"32": "browserAction/img/logo_32.png",
+		"48": "browserAction/img/logo_48.png"
 	},
 	"permissions": [
 		"tabs",
@@ -30,10 +32,10 @@
 	],
 	"browser_action": {
 		"default_title": "YouTube Playlist",
-		"default_icon": "browserAction/img/logo_20.gif",
+		"default_icon": "browserAction/img/logo_24.png",
 		"default_popup": "browserAction/playlist.html"
 	},
 	"web_accessible_resources": [
-		"notification/img/logo_48.png"
+		"browserAction/img/logo_48.png"
 	]
 }

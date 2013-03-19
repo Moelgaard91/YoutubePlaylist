@@ -1,6 +1,6 @@
 # YoutubePlaylist Chrome Extension #
 
-License: BSD
+Licence: BSD
 
 This extension for Google Chrome helps you manage playback of YouTube videos, creating playlist based on the tabs you have open, this way the videos is preloaded and thus makes the shifting between videos almost gapless.
 
@@ -23,3 +23,11 @@ Now all the needed software is downloaded and intalled, the only thing missing i
 1. Open Google Chrome and navigate to `chrome://extensions`
 2. Enable `Developer Mode`, if haven't done so already.
 3. Now two extra buttons becomes visible, hit the Load unpacked extension, and navigate to the build directory inide the project and click `Open`
+
+## Credits
+
+In this extension we have used some great icons made by:
+
+Paul Robert Lloyd - [http://paulrobertlloyd.com](http://paulrobertlloyd.com)
+
+Under the [Attribution-Share Alike 2.0 UK: England & Wales Licence](http://creativecommons.org/licenses/by-sa/2.0/uk)
