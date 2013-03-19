@@ -1,11 +1,17 @@
-# retrieve the background script of the extension.
-bkg = chrome.extension.getBackgroundPage()
-
-# the playlist object
-playlist = bkg.playlist
+# retrieve the playlist from the background script.
+playlist = chrome.extension.getBackgroundPage().playlist
 
 # find the the playlist ul DOM element.
-DOMPlaylist = document.getElementById 'playlist'
+$DOMPlaylist = $('#playlist')
+
+# map from tabId to the corresponding jQuery li element.
+listItems = {}
+# map from tabId to the corresponding jQuery a element.
+links = {}
+# map from tabId to the corresponding jQuery button element.
+buttons = {}
+# map from tabId to the corresponding jQuery icon element.
+icons = {}
 
 ###
 # Sets the control button's state of a playlist item.
@@ -14,41 +20,51 @@ DOMPlaylist = document.getElementById 'playlist'
 # @return void
 ###
 setControlButtonState = (tabId, state) ->
-	return unless (icon = document.getElementById "control-icon-#{tabId}")?
-	if state then icon['className'] = 'icon-pause' else icon['className'] = 'icon-play'
+	if state
+		icons[tabId][0]['className'] = 'icon-pause'
+	else
+		icons[tabId][0]['className'] = 'icon-play'
 
 ###
-# Sets the playing state of the li element
-# @param integer tabId
+# Sets the playing state of the li element.
+# @param integer
 # @param boolean state
 # @return void
 ###
 setItemState = (tabId, state) ->
-	return unless (li = document.getElementById "item-#{tabId}")?
-	if state then li['className'] = "active" else li['className'] = ""
+	if state
+		listItems[tabId][0]['className'] = 'active'
+	else
+		listItems[tabId][0]['className'] = ''
 
 
 ###
 # Create a control button.
 # @param Video video
-# @return HTMLButtonElement
+# @return jQuery
 ###
 createControls = (video) ->
-	btn = document.createElement 'button'
-	btn['className'] = 'btn btn-mini pull-right'
-	btn['id'] = "control-btn-#{video.tabId}"
-	# remember to parseInt when you retrieve the tabId from the data attribute
-	# because the result will be a string, and it cannot be used
-	# when dealing with chrome extension API, beacause the types are checked.
-	btn.setAttribute 'data-tabId', video.tabId
-	
-	i = document.createElement 'icon'
-	i['id'] = "control-icon-#{video.tabId}"
-	i.setAttribute 'data-tabId', video.tabId
-	if video.playing then	i['className'] = 'icon-pause' else i['className'] = 'icon-play'
+	# create button and save the video object on it.
+	$btn = $('<button />')
+		.addClass('btn btn-mini pull-right')
+		.data('video', video)
+	# update buttons map
+	buttons[video.tabId] = $btn
+
+	# save the video element on the icon
+	$i = $('<icon />')
+		.data('video', video)
+	# update icons map
+	icons[video.tabId] = $i
+	# setting the current state of the button.
+	$i.addClass if video.playing then 'icon-pause' else 'icon-play'
+	# append icon to button.
+	$btn.append $i
 	
 	# listens to when the a video is playing.
 	# to change the icon of the control button.
+	# NB! important the this parameter, is bound to the video object,
+	#     on which the event occured.
 	video.subscribeEvent 'change:playing', (state) ->
 		# set the new state of the control button.
 		setControlButtonState @tabId, state
@@ -56,59 +72,69 @@ createControls = (video) ->
 	
 	# listens to when the control button is clicked,
 	# to either start or stop the video.
-	btn.addEventListener 'click', (e) ->
+	$btn.on 'click', (e) ->
 		e.stopPropagation()
-		tabId = parseInt btn.getAttribute 'data-tabId'
-		i = document.getElementById "control-icon-#{tabId}"
-		if i['className'] is "icon-play"
-			playlist.playVideo tabId
-			isPlaying = yes
+		# get the video object from the button.
+		video = $(@).data 'video'
+
+		if (state = video.playing)
+			playlist.stopVideo video.tabId
 		else
-			playlist.stopVideo tabId
-			isPlaying = no
+			playlist.playVideo video.tabId
 
 		# set the current state of the control button.
-		setControlButtonState tabId, isPlaying
+		setControlButtonState video.tabId, (not state)
 		return false
 
-	btn.appendChild i
-	return btn
+	return $btn
 
 ###
 # Create a playlist item.
 # @param integer tabId
 # @param Video video
-# @return HTMLLiElement
+# @return jQuery
 ###
-createPlaylistItem = (tabId, video) ->
-	a  = document.createElement 'a'
-	li = document.createElement 'li'
-	
-	a.setAttribute 'data-tabId', tabId
-	a['href'] = '#'
-	
-	if tabId isnt -1
-		li['id'] = "item-#{tabId}"
-		li['className'] = "active" if video.playing
+createPlaylistItem = (video) ->
+	# creating the link and saves the video object on the link.
+	$a = $('<a />')
+		.attr('href', '#')
+		.data('video', video)
+	# update links map.
+	links[video.tabId] = $a
 
-		a['innerHTML']  = video.getFormattedTitle()
-		a.appendChild createControls video
-		a.addEventListener 'click', (e) ->
-			tabId = parseInt a.getAttribute 'data-tabId'
-			chrome.tabs.update tabId, selected: true
-	else
-		a['innerHTML'] = video.title
-		a['className'] = "empty"
+	# creating the list item and add the video object on the list.
+	$li = $('<li />').data('video', video)
+	# update listItems map.
+	listItems[video.tabId] = $li
 	
-	li.appendChild a
-	return li
+	# append a tag on list item.
+	$li.append $a
+
+	# if the video object isn't a special case, hence -1 tabId
+	if video.tabId isnt -1
+		# setting listItem active if the video is playing.
+		$li.addClass 'active' if video.playing
+		# insert the title.
+		$a.text video.getFormattedTitle()
+		# append the controls to the link.
+		$a.append createControls video
+		# hooking click handler up on the link, to set the active tab.
+		$a.on 'click', (e) ->
+			video = $(@).data('video')
+			chrome.tabs.update video.tabId, selected: true
+	else
+		# this is a special case, used for empty playlist element.
+		$a.text video.title
+		$a.addClass('empty')
+	
+	return $li
 
 ###
 # Initializing sortable list.
 # @return void
 ###
 initSortable = () ->
-	$('#playlist').sortable
+	$DOMPlaylist.sortable
 		axis: 'y'
 		forceHelperSize: yes
 		forcePlaceholderSize: yes
@@ -127,10 +153,10 @@ initSortable = () ->
 			# get a list of tab id, in the order
 			# they are in the DOM right now.
 			sortedItems = for a in $(@).find('>li>a')
-				parseInt a.getAttribute 'data-tabId'
+				$(a).data('video').tabId
 			
 			# get the tab id of the moved item.
-			tabId = parseInt ui.item.find('>a')[0].getAttribute 'data-tabId'
+			tabId = ui.item.data('video').tabId
 			
 			# get the new index of the item we just moved.
 			newIndex = sortedItems.indexOf tabId
@@ -149,31 +175,48 @@ initSortable = () ->
 				playlist.moveVideo tabId, newIndex, (err) ->
 					# same story down here.
 					renderPlaylist() if err?
+###
+# Clear objects and DOM
+# @return void
+###
+clearDOMAndMaps = () ->
+	listItems = {}
+	links = {}
+	buttons = {}
+	icons = {}
+	$DOMPlaylist.empty()
 
 ###
 # Render the playlist.
 # @return void
 ###
-renderPlaylist = () ->
-	DOMPlaylist.innerHTML = ""
+renderPlaylist = (clear = true) ->
+	# clearing the DOM an maps
+	clearDOMAndMaps() if clear
+
+	# creating empty playlist element.
 	if playlist.getPriority().length is 0
-		DOMPlaylist.appendChild createPlaylistItem -1, title: "The playlist is empty."
+		$DOMPlaylist.append createPlaylistItem tabId: -1, title: "The playlist is empty."
 	else
 		for id in playlist.getPriority()
 			video = playlist.getList()[id]
-			DOMPlaylist.appendChild createPlaylistItem id, video
+			$DOMPlaylist.append createPlaylistItem video
+		# initialize sortable
 		initSortable()
 
 # listens to when the a video is added to the playlist.
 playlist.subscribeEvent 'add:video', (tabId, videoObject) ->
+	# TODO: handle this better, then just re-render every time something happens.
 	renderPlaylist()
 
 # listens to when a video is removed to the playlist.
 playlist.subscribeEvent 'remove:video', (tabId) ->
+	# TODO: handle this better, then just re-render every time something happens.
 	renderPlaylist()
 
 # listens to when a video is moved around in the playlist.
 playlist.subscribeEvent 'move:video', (priorityList) ->
+	# TODO: handle this better, then just re-render every time something happens.
 	renderPlaylist()
 
 # waits to the DOM is loaded.
