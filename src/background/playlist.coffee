@@ -71,13 +71,15 @@ class Playlist
 	###
 	# Play video - sends a play event to the video player of the tabId
 	# @param integer tabId
-	# @param [function callback] (err, response)
+	# @param [function callback] (err)
 	# @return void
 	# @event start:video
 	###
 	playVideo: (tabId, callback) ->
 		callback msg: "The is no video on tabId: #{tabId}" unless (video = @list[tabId])?
-		@sendMsg tabId, 'play', callback
+		@sendMsg tabId, 'play'
+		@current = video
+		callback? null
 		@publishEvent 'start:video', video
 
 	###
