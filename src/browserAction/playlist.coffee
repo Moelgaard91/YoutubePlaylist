@@ -122,7 +122,7 @@ initSortable = () ->
 		start: (event, ui) ->
 			# add the necessary HTML and classes to the placeholder
 			# in order to render the list correctly when moving elements around.
-			$("#playlist > .placeholder").addClass('active').html ui.item.html()
+			$("#playlist > .placeholder").html ui.item.html()
 		update: (event, ui) ->
 			# get a list of tab id, in the order
 			# they are in the DOM right now.

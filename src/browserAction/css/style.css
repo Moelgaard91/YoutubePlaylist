@@ -24,7 +24,9 @@ body {
 	background-image: -webkit-linear-gradient(top,#C00,#B30000);
 }
 
-#playlist > li > a:hover {
+#playlist > li > a:hover,
+#playlist > li.placeholder > a {
+	color: #fff;
 	background-color: #B6B6B6;
 	background-image: -webkit-linear-gradient(top, #8D8D8D, #B3B3B3);
 }
@@ -34,7 +36,7 @@ body {
 }
 
 #playlist > .placeholder {
-	opacity: .1;
+	opacity: .4;
 }
 
 #playlist > li >a:hover {
