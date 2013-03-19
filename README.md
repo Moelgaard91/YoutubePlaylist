@@ -22,4 +22,4 @@ Now all the needed software is downloaded and intalled, the only thing missing i
 
 1. Open Google Chrome and navigate to `chrome://extensions`
 2. Enable `Developer Mode`, if haven't done so already.
-3. Now two extra buttons becomes visible, hit the Load unpacked extension, and navigate to the build directory inide the project and click `Open`
+3. Now two extra buttons becomes visible, hit the `Load unpacked extension`, and navigate to the build directory inide the project and click `Open`
