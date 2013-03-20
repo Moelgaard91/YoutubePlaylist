@@ -1,5 +1,10 @@
 # Changelog for YouTube Playlist
 
+### Version 1.0.4 - 2013-03-20
+
+* Made the initial work for large playlist support, it works now, if the user treat it, as intended, but having some problems, with controlling when a tab is removed, then another tab should open.
+* Added support for restoring "pending" videos, but there is a little problem controlling the desktop notifications for now.
+
 ### Version 1.0.3 - 2013-03-19
 
 * Fixed: The last item is removed from the list when the playlist is finished, but keeps the tab open, so the user has the oppotunity to add more videos.

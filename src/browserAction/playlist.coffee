@@ -33,9 +33,9 @@ setControlButtonState = (id, state) ->
 ###
 setItemState = (id, state) ->
 	if state
-		listItems[id][0]['className'] = 'active'
+		listItems[id].addClass 'active'
 	else
-		listItems[id][0]['className'] = ''
+		listItems[id].removeClass 'active'
 
 
 ###
@@ -50,6 +50,12 @@ createControls = (video) ->
 		.data('video', video)
 	# update buttons map
 	buttons[video.id] = $btn
+
+	# determine whether or not the contols should be active.
+	# disable pending videos.
+	$btn.prop('disabled', true) if video.pending
+	video.subscribeEvent 'change:pending', (pending) ->
+		buttons[@id]?.prop('disabled', pending)
 
 	# save the video element on the icon
 	$i = $('<icon />')
@@ -114,13 +120,20 @@ createPlaylistItem = (video) ->
 	if video.id isnt -1
 		# setting listItem active if the video is playing.
 		$li.addClass 'active' if video.playing
+		# setting listItem pending if the video is pending.
+		$li.addClass 'disabled' if video.pending		
 		# insert the title.
 		$a.text video.getFormattedTitle()
 		# append the controls to the link.
 		$a.append createControls video
 		# hooking click handler up on the link, to set the active tab.
+
+		video.subscribeEvent 'change:pending', (pending) ->
+			listItems[@id]?.toggleClass('disabled', pending)
+
 		$a.on 'click', (e) ->
 			video = $(@).data('video')
+			return if video.pending
 			chrome.tabs.update video.tabId, selected: true
 	else
 		# this is a special case, used for empty playlist element.

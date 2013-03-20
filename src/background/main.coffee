@@ -72,7 +72,8 @@ showDesktopNotification = (options) ->
 # listener that removes a video from the playlist, if it's tab is closed.
 chrome.tabs.onRemoved.addListener (tabId) ->
 	video = playlist.getVideoByTabId tabId
-	return console.error "There was no video found on tabId: #{tabId}" unless video?
+	# check if we know the tab
+	return unless video?
 	playlist.removeVideo tabId unless video.pending
 
 # initialize event listeners of the message channels
