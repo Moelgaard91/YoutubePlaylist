@@ -1,5 +1,9 @@
 # Changelog for YouTube Playlist
 
+### Version 1.0.5 - 2013-03-20
+
+* Fixed the large playlist support combined with remove element from playlist bug, so now new tabs is created, if there is any pending in the playlist.
+
 ### Version 1.0.4 - 2013-03-20
 
 * Made the initial work for large playlist support, it works now, if the user treat it, as intended, but having some problems, with controlling when a tab is removed, then another tab should open.
