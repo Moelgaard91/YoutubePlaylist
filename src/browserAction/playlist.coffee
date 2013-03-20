@@ -1,5 +1,7 @@
 # retrieve the playlist from the background script.
-playlist = chrome.extension.getBackgroundPage().playlist
+bkg = chrome.extension.getBackgroundPage()
+playlist = bkg.playlist
+_ = bkg._
 
 # find the the playlist ul DOM element.
 $DOMPlaylist = $('#playlist')
@@ -21,9 +23,9 @@ icons = {}
 ###
 setControlButtonState = (id, state) ->
 	if state
-		icons[id][0]['className'] = 'icon-pause'
+		icons[id]?[0]['className'] = 'icon-pause'
 	else
-		icons[id][0]['className'] = 'icon-play'
+		icons[id]?[0]['className'] = 'icon-play'
 
 ###
 # Sets the playing state of the li element.
@@ -33,9 +35,9 @@ setControlButtonState = (id, state) ->
 ###
 setItemState = (id, state) ->
 	if state
-		listItems[id].addClass 'active'
+		listItems[id]?.addClass 'active'
 	else
-		listItems[id].removeClass 'active'
+		listItems[id]?.removeClass 'active'
 
 
 ###
@@ -131,16 +133,29 @@ createPlaylistItem = (video) ->
 		video.subscribeEvent 'change:pending', (pending) ->
 			listItems[@id]?.toggleClass('disabled', pending)
 
+		video.subscribeEvent 'change:title', (title) ->
+			links[@id]?.contents()[0].textContent = @getFormattedTitle()
+
 		$a.on 'click', (e) ->
+			e.stopPropagation()
 			video = $(@).data('video')
-			return if video.pending
+			return false if video.pending
 			chrome.tabs.update video.tabId, selected: true
+			return false
 	else
 		# this is a special case, used for empty playlist element.
 		$a.text video.title
 		$a.addClass('empty')
 	
 	return $li
+
+###
+# Returns the order the elements are in the DOM
+# @return array<integer>
+###
+getSortedList = () ->
+	for a in $DOMPlaylist.find('>li>a')
+		$(a).data('video').id
 
 ###
 # Initializing sortable list.
@@ -157,7 +172,6 @@ initSortable = () ->
 		opacity: .6
 		distance: 5
 		placeholder: "placeholder"
-		tolerange: "pointer"
 		start: (event, ui) ->
 			# add the necessary HTML and classes to the placeholder
 			# in order to render the list correctly when moving elements around.
@@ -165,8 +179,7 @@ initSortable = () ->
 		update: (event, ui) ->
 			# get a list of tab id, in the order
 			# they are in the DOM right now.
-			sortedItems = for a in $(@).find('>li>a')
-				$(a).data('video').id
+			sortedItems = getSortedList()
 			
 			# get the tab id of the moved item.
 			id = ui.item.data('video').id
@@ -215,22 +228,56 @@ renderPlaylist = (clear = true) ->
 			video = playlist.getList()[id]
 			$DOMPlaylist.append createPlaylistItem video
 		# initialize sortable
-		initSortable()
+	initSortable()
+
+###
+# Removes all references to elements connected to a certain id.
+# @param integer id
+# @return void
+###
+listRemove = (id) ->
+	delete icons[id]
+	delete buttons[id]
+	delete links[id]
+	delete listItems[id]
+
+arrangeItemInDOM = ($li, index, isInDOM = true) ->
+	if index is 0
+		if $DOMPlaylist.find(".empty").length > 0
+			$DOMPlaylist.empty().append $li
+			return $li.slideDown()
+		if isInDOM
+			return $li.slideUp () ->
+				$(@).insertBefore($DOMPlaylist.find "li:eq(0)").slideDown()
+		else
+			$li.insertBefore($DOMPlaylist.find "li:eq(0)").slideDown()
+	else
+		if isInDOM
+			return $li.slideUp () ->
+				$(@).insertAfter($DOMPlaylist.find "li:eq(#{index-1})").slideDown()
+		else
+			$li.insertAfter($DOMPlaylist.find "li:eq(#{index-1})").slideDown()
 
 # listens to when the a video is added to the playlist.
 playlist.subscribeEvent 'add:video', (video) ->
-	# TODO: handle this better, then just re-render every time something happens.
-	renderPlaylist()
+	index = playlist.getPriority().indexOf video.id
+	return renderPlaylist() if index is -1
+	$li = createPlaylistItem video
+	arrangeItemInDOM $li.hide(), index, false
 
 # listens to when a video is removed to the playlist.
 playlist.subscribeEvent 'remove:video', (video) ->
-	# TODO: handle this better, then just re-render every time something happens.
-	renderPlaylist()
+	if ($li = listItems[video.id])?
+		$li.slideUp()
+		listRemove video.id
+	if playlist.getPriority().length is 0
+		$DOMPlaylist.append createPlaylistItem id: -1, title: "The playlist is empty."
 
 # listens to when a video is moved around in the playlist.
-playlist.subscribeEvent 'move:video', (priorityList) ->
-	# TODO: handle this better, then just re-render every time something happens.
-	renderPlaylist()
+playlist.subscribeEvent 'move:video', (video, index, priorityList) ->
+	return if _.isEqual priorityList, getSortedList()
+	return renderPlaylist() unless ($li = listItems[video.id])?
+	arrangeItemInDOM $li, index
 
 # waits to the DOM is loaded.
 document.addEventListener 'DOMContentLoaded', () ->

@@ -16,14 +16,14 @@ class Event
 	###
 	# Publish event.
 	# @param string event
-	# @param mixed data
+	# @param mixed data...
 	# @return void
 	###
-	publishEvent: (event, data) ->
+	publishEvent: (event, data...) ->
 		callbacks = @_events[event]
 		return unless callbacks?
 		for cb in callbacks
-			cb.call @, data
+			cb.apply @, data
 
 	###
 	# Subscribe to an event.

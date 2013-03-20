@@ -230,7 +230,7 @@ class Playlist
 	# @param integer newIndex
 	# @param [ function callback ] (err, priorityList)
 	# @return void
-	# @event move:video (video)
+	# @event move:video (video, index, priorityList)
 	###
 	moveVideo: (id, newIndex, callback) ->
 		return callback? msg: "The new index has to be greater than 0, got: #{newIndex}", @priority if newIndex < 0
@@ -263,7 +263,7 @@ class Playlist
 			@pendVideo @list[id]
 
 		callback? null, @priority
-		@publishEvent 'move:video', @priority
+		@publishEvent 'move:video', @list[id], newIndex, @priority
 
 	###
 	# Restore pending video.
