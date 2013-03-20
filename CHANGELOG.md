@@ -1,5 +1,11 @@
 # Changelog for YouTube Playlist
 
+### Version 1.0.6 - 2013-03-20
+
+* Fixed a bug in the Event mixin, causes that you could only receive one argument instead of arbitrary amount of arguments.
+* Made nice animations in the playlist pop-up.
+* Cleaned up in the popup, now we actually actively do insert, move and remove elements, instead of re-render the DOM every time something happens.
+
 ### Version 1.0.5 - 2013-03-20
 
 * Fixed the large playlist support combined with remove element from playlist bug, so now new tabs is created, if there is any pending in the playlist.
