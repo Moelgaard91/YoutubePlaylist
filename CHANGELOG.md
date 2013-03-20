@@ -1,9 +1,10 @@
 # Changelog for YouTube Playlist
 
-### Version 1.0.7
+### Version 1.1.0 - 2013-03-20
 
 * Fixed minor bugs in the playlist tab rotation - sometimes a video stays cold in the playlist as on orphan; not pending, no active tab attached.
-* Fixed removal of video from playlist, if a tab that contains a video and navigates away from the `youtube.com/watch` url substring. 
+* Fixed if a tab that contains a video and navigates away from the `youtube.com/watch` url substring, it will be removed from the list.
+* Can now remove videos from the playlist popup.
 
 ### Version 1.0.6 - 2013-03-20
 
