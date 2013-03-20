@@ -63,7 +63,7 @@ class Playlist
 			video = new Video id: @getNextId(), playing: false, tabId: tab.id, title: tab.title, videoUrl: tab.url, pending: false
 
 			# keep the lists updated.
-			@listPush video
+			@pushToList video
 			
 			# check if we have too many tabs opened.
 			if @length > @maxOpenVideoTabs
@@ -110,8 +110,9 @@ class Playlist
 		@listRemove video
 
 		# restore a tab, if there is any to restore.
-		if @length > @maxOpenVideoTabs
-			@restoreVideo @list[@priority[@maxOpenVideoTabs-1]]
+		if @length >= @maxOpenVideoTabs
+			v = @list[@priority[@maxOpenVideoTabs-1]]
+			@restoreVideo v if v.pending
 
 		callback? null
 		@publishEvent 'remove:video', video
@@ -188,10 +189,11 @@ class Playlist
 						@activateTab nextId
 					
 					# check if there are videos beyond the max limit.
-					if @length >= @maxOpenVideoTabs
-						# get the video at the limit.
+					if @length > @maxOpenVideoTabs
+						# get the video just beyond the limit.
 						video = @list[@priority[@maxOpenVideoTabs]]
 						# create tab if the tab is pending.
+						debugger unless video.pending
 						@restoreVideo video if video.pending
 
 					return callback? null, @list[nextId]
@@ -276,7 +278,7 @@ class Playlist
 		@createTab video.id, (err, tab) ->
 			return callback? err if err?
 			video.setTabId tab.id
-			video.setPending false
+			video.setPending no
 			callback? null, video, tab
 
 	###
@@ -338,6 +340,8 @@ class Playlist
 	###
 	listRemove: (video) ->
 		# delete the video references.
+		
+		debugger if (@list[video.id]?) isnt (_.contains @priority, video.id)
 		delete @list[video.id]
 		# keep the lists updated.
 		@priority.remove video.id
@@ -348,7 +352,7 @@ class Playlist
 	# @param Video video
 	# @return void
 	###
-	listPush: (video) ->
+	pushToList: (video) ->
 		@list[video.id] = video
 		@priority.push video.id
 		@length = @priority.length

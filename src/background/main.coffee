@@ -92,6 +92,17 @@ chrome.extension.onMessage.addListener (request, sender) ->
 			onStateChange request.state, sender.tab.id
 		else console.error "unknown event: #{request.event}"
 
+# catch if a tab that we know to contain a video,
+# navigates away from youtube watch pages,
+# and then remove it from the playlist.
+chrome.webNavigation.onCommitted.addListener (details) ->
+	return unless (playlist.getVideoByTabId details.tabId)?
+	# for some reason every navigation commits a
+	# navigation to about:blank before redirecting the actual requested site.
+	return if details.url is 'about:blank'
+	if details.url.indexOf("youtube.com/watch") is -1
+		playlist.removeVideo details.tabId
+
 # creates desktop notification, when something important happens.
 # and hook up click handlers to activate the tab where the video is.
 playlist.subscribeEvent 'add:video', (video) ->
