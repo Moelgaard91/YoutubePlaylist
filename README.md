@@ -24,6 +24,16 @@ Now all the needed software is downloaded and intalled, the only thing missing i
 2. Enable `Developer Mode`, if haven't done so already.
 3. Now two extra buttons becomes visible, hit the `Load unpacked extension`, and navigate to the build directory inide the project and click `Open`
 
+## Versioning
+
+We live by our own idea of versioning, borrowed a couple ideas from other philosophies and concept.
+
+We use the format x.y.z(z), and every y%2 is considered as stable, where z is hotfix versions, x has no semantic value, other than it goes up when y > 9.
+
+We use a roadmap for every release to keep track of our goals. You can find it in ROADMAP.md.
+
+When the specification requirements for a version is met, then y becomes the number below the roadmap stable version, e.g. if the roadmap describes version 1.2.0, then the version will be bumped to 1.1.0 when all the features in the 1.2.0 specification is implemented, until the version has been fully bug-fixed, and then the version will be bumped to 1.2.0, and a new cycle begins.
+
 ## Credits
 
 In this extension we have used some great icons made by:
