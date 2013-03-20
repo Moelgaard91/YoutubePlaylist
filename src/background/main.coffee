@@ -8,6 +8,11 @@ STATE_VIDEO_CUED = 5
 # constructs a playlist
 playlist = new Playlist
 
+###
+# map holding the currently active desktop notifications
+# this is mainly used, to prevent double triggering of notifications.
+# @var object { eventString: Notification }
+###
 desktopNotifications = {}
 
 ###
