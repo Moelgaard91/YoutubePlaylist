@@ -46,7 +46,9 @@ body {
 }
 
 #playlist > li > a.video:hover,
+#playlist > li > a.empty:hover,
 #playlist > li:hover > a.video,
+#playlist > li:hover > a.empty,
 #playlist > li.placeholder > a.video {
 	color: #fff;
 	background-color: #B6B6B6;
