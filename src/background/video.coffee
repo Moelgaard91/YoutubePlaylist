@@ -45,7 +45,7 @@ class Video
 
 	###
 	# Constructs a video object
-	# @param object
+	# @param object obj A hash of the properties you want to set on the video object.
 	###
 	constructor: (obj) ->
 		_(@).extend obj
@@ -54,7 +54,7 @@ class Video
 	# Sets the playing state of the video.
 	# @param boolean playing
 	# @return void
-	# @event change:playing
+	# @event change:playing (playing)
 	###
 	setPlaying: (playing) ->
 		return if playing is @playing
@@ -65,7 +65,7 @@ class Video
 	# Sets the title of the video
 	# @param string title
 	# @return void
-	# @event change:title
+	# @event change:title (title)
 	###
 	setTitle: (title) ->
 		return if title is @title
@@ -76,7 +76,7 @@ class Video
 	# Sets the video url.
 	# @param string videoUrl
 	# @return void
-	# @event change:videoUrl
+	# @event change:videoUrl (videoUrl)
 	###
 	setVideoUrl: (videoUrl) ->
 		return if videoUrl is @videoUrl
@@ -87,7 +87,7 @@ class Video
 	# Sets the pending state of the video.
 	# @param boolean pending
 	# @return void
-	# @event change:pending
+	# @event change:pending (pending)
 	###
 	setPending: (pending) ->
 		return if pending is @pending
@@ -98,7 +98,7 @@ class Video
 	# Sets the tabId of the video.
 	# @param integer tabId
 	# @return void
-	# @event change:tabId
+	# @event change:tabId (tabId)
 	###
 	setTabId: (tabId) ->
 		return if tabId is @tabId
