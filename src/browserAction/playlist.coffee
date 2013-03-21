@@ -108,9 +108,9 @@ createControls = (video) ->
 		video = $(@).data 'video'
 
 		if (state = video.playing)
-			playlist.stopVideo video.id
+			playlist.stopVideo video
 		else
-			playlist.playVideo video.id
+			playlist.playVideo video
 
 		# set the current state of the control button.
 		setControlButtonState video.id, (not state)
@@ -144,7 +144,7 @@ createLink = (video) ->
 			e.preventDefault()
 			video = $(@).data('video')
 			return false if video.pending
-			playlist.activateTab video.id
+			playlist.activateTab video
 			return false
 
 	return $a
@@ -258,10 +258,10 @@ initSortable = () ->
 			sortedItems = getSortedList()
 			
 			# get the tab id of the moved item.
-			id = ui.item.data('video').id
+			video = ui.item.data 'video'
 			
 			# get the new index of the item we just moved.
-			newIndex = sortedItems.indexOf id
+			newIndex = sortedItems.indexOf video.id
 			if newIndex is 0 and playlist.isPlaying()
 				# you cannot move an item above a playing item.
 				# which always will be at the top of the list.
@@ -274,7 +274,7 @@ initSortable = () ->
 				# because the damage is unrecoverable.
 				renderPlaylist()
 			else
-				playlist.moveVideo id, newIndex, (err) ->
+				playlist.moveVideo video, newIndex, (err) ->
 					# same story down here.
 					renderPlaylist() if err?
 

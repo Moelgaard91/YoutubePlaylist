@@ -11,11 +11,6 @@ class Playlist
 	_(@prototype).extend Event.prototype
 
 	###
-	# @var integer id counter
-	###
-	idCounter: 0
-
-	###
 	# @var object id: Video
 	###
 	list: {}
@@ -42,9 +37,9 @@ class Playlist
 
 	###
 	# Get the next unique id.
-	# @return integer
+	# @return string
 	###
-	getNextId: () -> @idCounter++
+	getNextId: () -> _.uniqueId 'video'
 
 	###
 	# Adds a video in paused mode, to the playlist
@@ -57,7 +52,7 @@ class Playlist
 		err = null
 		if (video = @getVideoByTabId tab.id)?
 			# update the video, if we already no the video.
-			return @updateVideo video.id, tab.title, tab.url, callback
+			return @updateVideo video, tab.title, tab.url, callback
 		else
 			# create new video object.
 			video = new Video id: @getNextId(), playing: false, tabId: tab.id, title: tab.title, videoUrl: tab.url, pending: false
@@ -74,15 +69,14 @@ class Playlist
 			@publishEvent 'add:video', video
 
 	###
-	# @param integer id
+	# @param Video video
 	# @param string title
 	# @param string videoUrl
 	# @param [ function callback ] (err)
 	# @return void
 	# @event update:video (video)
 	###
-	updateVideo: (id, title, videoUrl, callback) ->
-		return callback? msg: "There is no video with id: #{id}" unless (video = @list[id])?
+	updateVideo: (video, title, videoUrl, callback) ->
 		# no need to fire an update event, when a tab comes in with the same url,
 		# it properly has the same url, because the tab was just restored.
 		return callback? null, video if video.videoUrl is videoUrl
@@ -119,15 +113,12 @@ class Playlist
 
 	###
 	# Play video - sends a play event to the video player of the id.
-	# @param integer id
+	# @param Video video
 	# @param [ function callback ] (err)
 	# @return void
 	# @event start:video (video)
 	###
-	playVideo: (id, callback) ->
-		# check if we know the video.
-		callback msg: "The is no video with id: #{id}" unless (video = @list[id])?
-		
+	playVideo: (video, callback) ->
 		# send the play message to tab's content script.
 		@sendMsg video.tabId, 'play'
 
@@ -136,13 +127,11 @@ class Playlist
 
 	###
 	# Stop video - sends a stop event to the video player of the tabId
-	# @param integer id
+	# @param Video video
 	# @param [ function callback ] (err, res)
 	# @event pause:video (video)
 	###
-	stopVideo: (id, callback) ->
-		# check if we know the video.
-		return callback? msg: "There is no video on id: #{id}" unless (video = @list[id])?
+	stopVideo: (video, callback) ->
 		# NB! this should never happen.
 		return callback? msg: "The video is pending state: so there is no video to stop" if video.pending
 		
@@ -182,43 +171,40 @@ class Playlist
 			
 			# removing the tab of the newly finished video.
 			chrome.tabs.remove @current.tabId, () =>
-				
+
+				nextVideo = @list[nextId]
 				# play the next video
-				@playVideo nextId, () =>
+				@playVideo nextVideo, () =>
 					if isActive
-						@activateTab nextId
+						@activateTab nextVideo
 					
 					# check if there are videos beyond the max limit.
 					if @length > @maxOpenVideoTabs
 						# get the video just beyond the limit.
 						video = @list[@priority[@maxOpenVideoTabs]]
 						# create tab if the tab is pending.
-						debugger unless video.pending
 						@restoreVideo video if video.pending
 
-					return callback? null, @list[nextId]
+					return callback? null, nextVideo
 
 	###
 	# Activate the tab corresponding to the id.
-	# @param integer id
+	# @param Video video
 	# @param [ function callback ] (err)
 	# @return void
 	###
-	activateTab: (id, callback) ->
-		return callback? msg: "There is no video with that id found", video: video unless (video = @list[id])?
-		# active the tab if its there.
+	activateTab: (video, callback) ->
 		return chrome.tabs.update video.tabId, { selected: true }, callback unless video.pending
 		# create tab if the video is in pending mode.
-		@createTab id, callback
+		@createTab video, callback
 
 	###
 	# Create a tab based on a video id.
-	# @param integer id
+	# @param Video video
 	# @param function callback (err, tab)
 	# @return void
 	###
-	createTab: (id, callback) ->
-		return callback msg: "There is no video with id: #{id}" unless (video = @list[id])?
+	createTab: (video, callback) ->
 		chrome.tabs.create
 			index: 999
 			url: video.videoUrl
@@ -227,17 +213,17 @@ class Playlist
 			callback null, tab
 
 	###
-	# Move a video to a new index in the priority
-	# @param integer id
+	# Move a video to a new index in the priority.
+	# @param Video video
 	# @param integer newIndex
 	# @param [ function callback ] (err, priorityList)
 	# @return void
 	# @event move:video (video, index, priorityList)
 	###
-	moveVideo: (id, newIndex, callback) ->
+	moveVideo: (video, newIndex, callback) ->
 		return callback? msg: "The new index has to be greater than 0, got: #{newIndex}", @priority if newIndex < 0
 		return callback? msg: "Index out of bounce, max index: #{maxIndex}", @priority              if newIndex > (maxIndex = @length.length - 1)
-		return callback? msg: "The id doesn't exist in the playlist priority: #{id}", @priority     if (oldIndex = _.indexOf @priority, id) is -1
+		return callback? msg: "The id doesn't exist in the playlist priority: #{id}", @priority     if (oldIndex = _.indexOf @priority, video.id) is -1
 
 		# move elements in array magic.
 		if newIndex >= @priority.length
@@ -250,7 +236,7 @@ class Playlist
 		if oldIndex >= @maxOpenVideoTabs and newIndex < @maxOpenVideoTabs
 		
 			# restore the moved video.
-			@restoreVideo @list[id]
+			@restoreVideo video
 
 			# set the video which stepped over the limit to pending.
 			@pendVideo @list[@priority[@maxOpenVideoTabs]]
@@ -262,10 +248,10 @@ class Playlist
 			@restoreVideo @list[@priority[@maxOpenVideoTabs-1]]
 		
 			# set the moved video to pending.
-			@pendVideo @list[id]
+			@pendVideo video
 
 		callback? null, @priority
-		@publishEvent 'move:video', @list[id], newIndex, @priority
+		@publishEvent 'move:video', video, newIndex, @priority
 
 	###
 	# Restore pending video.
@@ -275,7 +261,7 @@ class Playlist
 	###
 	restoreVideo: (video, callback) ->
 		return callback? msg: "The video is not pending", video: video unless video.pending
-		@createTab video.id, (err, tab) ->
+		@createTab video, (err, tab) ->
 			return callback? err if err?
 			video.setTabId tab.id
 			video.setPending no
@@ -306,11 +292,11 @@ class Playlist
 		
 		# stop the video if the current tab isn't our selves.
 		if @current? and @current.tabId isnt tabId
-			@stopVideo @current.id
+			@stopVideo @current
 		
 		# move the video to index 0, if it isn't already there.
 		if tabId isnt @list[@priority[0]].tabId
-			@moveVideo video.id, 0
+			@moveVideo video, 0
 		
 		# sets current video.
 		@current = video
@@ -329,9 +315,9 @@ class Playlist
 	# @event pause:video (video)
 	###
 	setPaused: (tabId) ->
-		if (video = @getVideoByTabId tabId)?
-			video.setPlaying false
-			@publishEvent 'pause:video', video
+		return unless (video = @getVideoByTabId tabId)?
+		video.setPlaying false
+		@publishEvent 'pause:video', video
 
 	###
 	# Removes a video from the lists.
@@ -340,8 +326,6 @@ class Playlist
 	###
 	listRemove: (video) ->
 		# delete the video references.
-		
-		debugger if (@list[video.id]?) isnt (_.contains @priority, video.id)
 		delete @list[video.id]
 		# keep the lists updated.
 		@priority.remove video.id
@@ -367,7 +351,7 @@ class Playlist
 	# Get the priority list, which contains an array of ids,
 	# in the order of when they should be played, index 0 is the currently playing
 	# index 1 is the next video.
-	# @return array<integer>
+	# @return array<string>
 	###
 	getPriority: () -> @priority
 
@@ -380,6 +364,13 @@ class Playlist
 		for k, v of @list
 			return v if v.tabId is tabId
 		return null
+
+  ###
+  # Get a video by id.
+  # @param string id
+  # @return Video|null
+  ###
+	getVideoById: (id) -> @list[id] ? null
 
 	###
 	# Send a message to a tab.
