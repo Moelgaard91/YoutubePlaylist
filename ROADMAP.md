@@ -18,3 +18,11 @@ so the next item opens a tab - we may have to rethink the way out event handling
 * Make desktop notificatoin customizable.
 * Make how many tabs can be open at once customizable, which affects the tab rotation.
 * Make a setting where you can disable the extension by right clicking on the popup button.
+* Making a way to cancelling adding to playlist, e.g. when holding down a butten when clicking on the link.
+* And make it possible to enque a video just after the current playing video.
+
+
+### Version 1.6.0
+
+* Make support for saving playlists
+* Making an interface for making, edit and delete playlists, posible another application connected in the webstore as a chrome web application.
