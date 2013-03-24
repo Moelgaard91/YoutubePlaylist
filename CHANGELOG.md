@@ -1,5 +1,10 @@
 # Changelog for YouTube Playlist
 
+### Version 1.1.1 - 2013-03-25
+
+* Made the API a lot more consistent, now passing Video objects around, instead of ids.
+* Added parameter checking in callbacks, so now there is a better error handling for debugging purposes.
+
 ### Version 1.1.0 - 2013-03-20
 
 * Fixed minor bugs in the playlist tab rotation - sometimes a video stays cold in the playlist as on orphan; not pending, no active tab attached.

@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "YouTube Playlist",
 	"description": "This extension helps you manage playback of YouTube videos, creating playlist based on the tabs you have open.",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"background": {
 		"scripts": [
 			"vendor/underscore.js",
