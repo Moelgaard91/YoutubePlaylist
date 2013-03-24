@@ -296,6 +296,10 @@ clearDOMAndMaps = () ->
 	icons = {}
 	$DOMPlaylist.empty()
 
+###
+# Create empty playlist item.
+# @return jQuery li
+###
 createEmptyPlaylistItem = () ->
 	createPlaylistItem id: -1, title: "The playlist is empty."
 

@@ -21,7 +21,6 @@ so the next item opens a tab - we may have to rethink the way out event handling
 * Making a way to cancelling adding to playlist, e.g. when holding down a butten when clicking on the link.
 * And make it possible to enque a video just after the current playing video.
 
-
 ### Version 1.6.0
 
 * Make support for saving playlists
