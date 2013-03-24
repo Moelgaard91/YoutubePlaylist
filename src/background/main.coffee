@@ -18,17 +18,20 @@ desktopNotifications = {}
 ###
 # The state chenge handler.
 # @param string state
-# @param integer tabId
+# @param Video video
 # @return void
 ###
-onStateChange = (state, tabId) ->
+onStateChange = (state, video) ->
 	switch state
 		when STATE_PLAYING
-			playlist.setPlaying tabId
+			playlist.setPlaying video, (err, video) ->
+				console.error "onStateChange: Couldn't set video playing", err, video if err?
 		when STATE_PAUSED
-			playlist.setPaused tabId
+			playlist.setPaused video, (err, video) ->
+				console.error "onStateChange: Couldn't set video paused", err, video if err?
 		when STATE_ENDED
-			playlist.playNext()
+			playlist.playNext (err) ->
+				console.error "onStateChange: Couldn't play next video", err if err?
 		# when STATE_UNSTARTED
 		# when STATE_BUFFERING
 		# when STATE_VIDEO_CUED 
@@ -76,10 +79,13 @@ showDesktopNotification = (options) ->
 
 # listener that removes a video from the playlist, if it's tab is closed.
 chrome.tabs.onRemoved.addListener (tabId) ->
-	video = playlist.getVideoByTabId tabId
-	# check if we know the tab
-	return unless video?
-	playlist.removeVideo tabId unless video.pending
+	return unless (video = playlist.getVideoByTab tabId, (byId = yes))?
+	# if the video is pending, it means that a video has been added,
+	# but the playlist has reached max length, so the video tab has been removed.
+	# and the video has been set in pending state, so the video should not be removed.
+	unless video.pending
+		playlist.removeVideo video, (err, video) ->
+			console.error "onTabRemove: Couldn't remove video", err, video if err?
 
 # initialize event listeners of the message channels
 # between the content scripts, that is injected into the DOM.
@@ -92,41 +98,52 @@ chrome.extension.onMessage.addListener (request, sender) ->
 	switch request.event
 		when 'Greetings'
 			playlist.addVideo sender.tab,  (err, video) ->
-				playlist.stopVideo video unless playlist.length is 1
+				return console.error "onGreetings: Couldn't add video", err, video if err?
+				unless playlist.length is 1
+					playlist.stopVideo video, (err, video) ->
+						#console.error "onTabGreetings: Couldn't stop video", err, video if err?
 		when 'stateChange'
-			onStateChange request.state, sender.tab.id
+			video = playlist.getVideoByTab sender.tab
+			onStateChange request.state, video
 		else console.error "unknown event: #{request.event}"
 
 # catch if a tab that we know to contain a video,
 # navigates away from youtube watch pages,
 # and then remove it from the playlist.
 chrome.webNavigation.onCommitted.addListener (details) ->
-	return unless (playlist.getVideoByTabId details.tabId)?
+	return unless (video = playlist.getVideoByTab details.tabId, (byId = yes))?
 	# for some reason every navigation commits a
 	# navigation to about:blank before redirecting the actual requested site.
 	return if details.url is 'about:blank'
 	if details.url.indexOf("youtube.com/watch") is -1
-		playlist.removeVideo details.tabId
+		playlist.removeVideo video, (err, video) ->
+			console.error "onCommittedNavigation: Couldn't remove video", err, video if err?
 
 # creates desktop notification, when something important happens.
 # and hook up click handlers to activate the tab where the video is.
 playlist.subscribeEvent 'add:video', (video) ->
 	notification = showDesktopNotification
-		id: "add:video:#{video.tabId}"
+		id: "add:video:#{video.tab.id}"
 		title: "Video added to playlist"
 		body: video.getFormattedTitle()
-	notification?.onclick = () -> chrome.tabs.update video.tabId, selected: true
+	notification?.onclick = () ->
+		playlist.activateTab video, (err) ->
+			console.error "addNotification: Couldn't activate tab", err if err?
 
 playlist.subscribeEvent 'update:video', (video) ->
 	notification = showDesktopNotification
-		id: "update:video:#{video.tabId}"
+		id: "update:video:#{video.tab.id}"
 		title: "Video updated in playlist"
 		body: video.getFormattedTitle()
-	notification?.onclick = () -> chrome.tabs.update video.tabId, selected: true
+	notification?.onclick = () ->
+		playlist.activateTab video, (err) ->
+			console.error "updateNotification: Couldn't activate tab", err if err?
 
 playlist.subscribeEvent 'start:video', (video) ->
 	notification = showDesktopNotification
-		id: "start:video:#{video.tabId}"
+		id: "start:video:#{video.tab.id}"
 		title: "Video now playing"
 		body: video.getFormattedTitle()
-	notification?.onclick = () -> chrome.tabs.update video.tabId, selected: true
+	notification?.onclick = () ->
+		playlist.activateTab video, (err) ->
+			console.error "stateNotification: Couldn't activateTab", err if err?

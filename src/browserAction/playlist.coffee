@@ -20,7 +20,7 @@ icons = {}
 
 ###
 # Sets the control button's state of a playlist item.
-# @param integer id
+# @param string id
 # @param boolean state
 # @return void
 ###
@@ -32,7 +32,7 @@ setControlButtonState = (id, state) ->
 
 ###
 # Sets the playing state of the li element.
-# @param integer id
+# @param string id
 # @param boolean state
 # @return void
 ###
@@ -108,9 +108,11 @@ createControls = (video) ->
 		video = $(@).data 'video'
 
 		if (state = video.playing)
-			playlist.stopVideo video
+			playlist.stopVideo video, (err, video) ->
+				console.error "pause: Couln't stop video", err, video if err?
 		else
-			playlist.playVideo video
+			playlist.playVideo video, (err, video) ->
+				console.error "play: Couldn't start video", err, video if err?
 
 		# set the current state of the control button.
 		setControlButtonState video.id, (not state)
@@ -144,7 +146,8 @@ createLink = (video) ->
 			e.preventDefault()
 			video = $(@).data('video')
 			return false if video.pending
-			playlist.activateTab video
+			playlist.activateTab video, (err, video, tab) ->
+				console.error "selectTab: Couldn't activate tab", err, video, tab if err?
 			return false
 
 	return $a
@@ -171,14 +174,17 @@ createRemoveLink = (video) ->
 		# it is either the last video in the list,
 		# and we would like to keep the tab openend then.
 		if video.pending or playlist.length is 1
-			playlist.sendMsg video.tabId, 'stop' if playlist.length is 1
-			playlist.removeVideo video.tabId
+			if playlist.length is 1
+				playlist.sendMsg video, 'stop', (err) ->
+					console.error "remove: Couldn't send msg", err if err?
+			playlist.removeVideo video, (err, video) ->
+				console.error "remove: Couldn't remove video", err, video if err?
 			return false
 
 		# simply just remove the tab, and the events handle the rest.
 		# if the tab is not the last item in the list,
 		# and it is not pending, ergo it has a tab open.
-		chrome.tabs.remove video.tabId
+		chrome.tabs.remove video.tab.id
 		return false
 	return $a
 
@@ -275,6 +281,7 @@ initSortable = () ->
 				renderPlaylist()
 			else
 				playlist.moveVideo video, newIndex, (err) ->
+					console.error "move: Couldn't move video", err if err?
 					# same story down here.
 					renderPlaylist() if err?
 
@@ -289,6 +296,9 @@ clearDOMAndMaps = () ->
 	icons = {}
 	$DOMPlaylist.empty()
 
+createEmptyPlaylistItem = () ->
+	createPlaylistItem id: -1, title: "The playlist is empty."
+
 ###
 # Render the playlist.
 # @return void
@@ -299,7 +309,7 @@ renderPlaylist = (clear = true) ->
 
 	# creating empty playlist element.
 	if playlist.getPriority().length is 0
-		$DOMPlaylist.append createPlaylistItem id: -1, title: "The playlist is empty."
+		$DOMPlaylist.append createEmptyPlaylistItem()
 	else
 		for id in playlist.getPriority()
 			video = playlist.getList()[id]
@@ -357,7 +367,7 @@ playlist.subscribeEvent 'remove:video', (video) ->
 			$(@).remove()
 		listRemove video.id
 	if playlist.getPriority().length is 0
-		$DOMPlaylist.append createPlaylistItem id: -1, title: "The playlist is empty."
+		$DOMPlaylist.append createEmptyPlaylistItem()
 
 # listens to when a video is moved around in the playlist.
 playlist.subscribeEvent 'move:video', (video, index, priorityList) ->

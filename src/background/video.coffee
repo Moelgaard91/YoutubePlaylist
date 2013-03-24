@@ -27,9 +27,9 @@ class Video
 
 	###
 	# It is not a given that a video has been assigned to a tab yet.
-	# @var integer|null
+	# @var Tab|null
 	###
-	tabId: null
+	tab: null
 
 	###
 	# @var string
@@ -96,14 +96,14 @@ class Video
 
 	###
 	# Sets the tabId of the video.
-	# @param integer tabId
+	# @param Tab tab
 	# @return void
-	# @event change:tabId (tabId)
+	# @event change:tab (tab)
 	###
-	setTabId: (tabId) ->
-		return if tabId is @tabId
-		@tabId = tabId
-		@publishEvent 'change:tabId', tabId
+	setTab: (tab) ->
+		return if tab.id is @tab.id
+		@tab = tab
+		@publishEvent 'change:tab', tab
 
 	###
 	# Get the formatted title, Foo Fighters - The Pretender - Youtube
@@ -119,4 +119,4 @@ class Video
 	# Return whether a video has a tab.
 	# @return boolean
 	###
-	hasTab: () -> @tabId?
+	hasTab: () -> @tab?
