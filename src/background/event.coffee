@@ -42,4 +42,8 @@ class Event
 	# @return void
 	###
 	unsubscribeEvent: (event, callback) ->
-		@_events[event].remove callback if @_events[event]?.remove?
+		if @_events[event]?
+			@_events[event].remove callback
+			delete @_events[event] if @_events[event].length is 0
+
+exports?.Event = Event

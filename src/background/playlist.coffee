@@ -436,3 +436,5 @@ class Playlist
 		return callback? msg: "The video cannot be empty" unless video?
 		chrome.tabs.sendMessage video.tab.id, msg, () ->
 			callback? null, arguments...
+
+exports?.Playlist = Playlist

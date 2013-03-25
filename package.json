@@ -11,7 +11,9 @@
     ],
     "devDependencies" : {
         "underscore" : ">=0.0.1",
-        "mkdirp": ">=0.0.1"
+        "mkdirp": ">=0.0.1",
+        "jasmine-node": ">=0.0.1",
+        "coffee-script": ">=1.6.2"
     },
     "license" : "BSD"
 }

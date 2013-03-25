@@ -3,6 +3,7 @@ path = require 'path'
 {exec} = require 'child_process'
 mkdirp = require 'mkdirp'
 _ = require 'underscore'
+jasmine = require 'jasmine-node'
 
 input = 'src'
 output = 'build'
@@ -71,3 +72,7 @@ task 'build', 'Builds the project', (options) ->
 					copyFile (path.join input, file), (path.join output, file), () ->
 						return next()
 			)()
+
+task 'test', 'Run the test suite', (options) ->
+	exec 'node ./node_modules/jasmine-node/lib/jasmine-node/cli.js --coffee --color --verbose tests', (err, stdout, stderr) ->
+		console.log stdout

@@ -120,3 +120,5 @@ class Video
 	# @return boolean
 	###
 	hasTab: () -> @tab?
+
+exports?.Video = Video
