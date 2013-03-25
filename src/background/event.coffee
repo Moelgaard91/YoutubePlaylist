@@ -46,4 +46,5 @@ class Event
 			@_events[event].remove callback
 			delete @_events[event] if @_events[event].length is 0
 
+# This is for testing purposes only.
 exports?.Event = Event

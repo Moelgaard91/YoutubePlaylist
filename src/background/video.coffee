@@ -1,3 +1,8 @@
+# This is for testing purposes only.
+if require?
+	_ = require 'underscore'
+	{Event} = require './event'
+
 ###
 # The video class, used by playlist.
 # @author thetrompf
@@ -121,4 +126,5 @@ class Video
 	###
 	hasTab: () -> @tab?
 
+# This is for testing purposes only.
 exports?.Video = Video

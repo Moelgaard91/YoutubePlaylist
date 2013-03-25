@@ -1,5 +1,5 @@
-{Event} = require '../src/background/event'
 _ = require 'underscore'
+{Event} = require '../src/background/event'
 
 describe 'The internal callback stack in the Event mixin', () ->
 	

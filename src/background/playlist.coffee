@@ -1,3 +1,8 @@
+# This is for testing purposes only.
+if require?
+	_ = require 'underscore'
+	{Event} = require './event'
+
 ###
 # The actual playlist.
 # @author thetrompf
@@ -437,4 +442,5 @@ class Playlist
 		chrome.tabs.sendMessage video.tab.id, msg, () ->
 			callback? null, arguments...
 
+# This is for testing purposes only.
 exports?.Playlist = Playlist
