@@ -100,13 +100,14 @@ class Video
 		@publishEvent 'change:pending', pending
 
 	###
-	# Sets the tabId of the video.
-	# @param Tab tab
+	# Sets the tab of the video.
+	# @param Tab|null tab
 	# @return void
 	# @event change:tab (tab)
 	###
 	setTab: (tab) ->
-		return if tab.id is @tab.id
+		return if not tab? and not @tab?
+		return if tab?.id is @tab?.id
 		@tab = tab
 		@publishEvent 'change:tab', tab
 
@@ -117,8 +118,8 @@ class Video
 	###
 	getFormattedTitle: () ->
 		youtubeString = " - YouTube"
-		return @title if @title.length < youtubeString.length
-		return @title.substring 0, (@title.length - youtubeString.length)
+		return @title if (i = @title.lastIndexOf youtubeString) is -1
+		return @title.substring 0, i
 
 	###
 	# Return whether a video has a tab.
