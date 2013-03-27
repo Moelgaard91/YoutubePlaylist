@@ -2,6 +2,7 @@
 if require?
 	_ = require 'underscore'
 	{Event} = require './event'
+	{Video} = require './video'
 
 ###
 # The actual playlist.
@@ -18,12 +19,12 @@ class Playlist
 	###
 	# @var object id: Video
 	###
-	list: {}
+	list: null
 	
 	###
 	# @var array id
 	###
-	priority: []
+	priority: null
 
 	###
 	# @var Video currently selected video object
@@ -41,10 +42,19 @@ class Playlist
 	maxOpenVideoTabs: 5
 
 	###
+	# Constructs the playlist.
+	# @param object settings
+	###
+	constructor: (settings) ->
+		@priority = []
+		@list = {}
+
+	###
 	# Get the next unique id.
+	# @param [ string prefix ]
 	# @return string
 	###
-	getNextId: () -> _.uniqueId 'video'
+	getNextId: (prefix = 'video') -> _.uniqueId prefix
 
 	###
 	# Adds a video in paused mode, to the playlist
@@ -77,8 +87,10 @@ class Playlist
 	# Create a video.
 	# @param Tab tab
 	# @return Video
+	# @throws Error
 	###
 	createVideo: (tab) ->
+		throw new Error "Invalid tab" unless tab? and tab.title? and tab.url? and tab.id?
 		new Video
 			id: @getNextId()
 			playing: false
@@ -96,6 +108,7 @@ class Playlist
 	# @event update:video (video)
 	###
 	updateVideo: (video, tab, callback) ->
+		throw new Error "Invalid tab" unless tab? and tab.id? and tab.url? and tab.title?
 		return callback? msg: "The video cannot be empty" unless video?
 		# no need to fire an update event, when a tab comes in with the same url,
 		# it properly has the same url, because the tab was just restored.
@@ -104,6 +117,7 @@ class Playlist
 		# update the properties.
 		video.setTitle tab.title
 		video.setVideoUrl tab.url
+		video.setTab tab
 
 		callback? null, video
 		@publishEvent 'update:video', video

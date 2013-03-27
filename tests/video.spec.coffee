@@ -19,14 +19,14 @@ describe "The video property bag", () ->
 			title: "Foo Figthers - The Pretender - YouTube"
 			pending: no
 
-		(expect video.id).toBe "video1"
-		(expect video.videoUrl).toBe "http://www.youtube.com/watch?v=SBjQ9tuuTJQ"
-		(expect video.playing).toBe no
-		(expect video.tab.id).toBe 432
+		(expect video.id).toEqual "video1"
+		(expect video.videoUrl).toEqual "http://www.youtube.com/watch?v=SBjQ9tuuTJQ"
+		(expect video.playing).toBeFalsy()
+		(expect video.tab.id).toEqual 432
 		(expect video.tab.url).toBe "http://www.youtube.com/watch?v=SBjQ9tuuTJQ"
-		(expect video.tab.windowId).toBe 1
-		(expect video.title).toBe "Foo Figthers - The Pretender - YouTube"
-		(expect video.pending).toBe no
+		(expect video.tab.windowId).toEqual 1
+		(expect video.title).toEqual "Foo Figthers - The Pretender - YouTube"
+		(expect video.pending).toBeFalsy()
 
 	it "should be able to set all properties via the setters, except the id", () ->
 		@video.setPlaying yes
@@ -39,22 +39,22 @@ describe "The video property bag", () ->
 		@video.setTitle "Foo Figthers - These Days - YouTube"
 		@video.setPending yes
 
-		(expect @video.id).toBe null
-		(expect @video.videoUrl).toBe "http://www.youtube.com/watch?v=5OWgxqoGedE"
-		(expect @video.playing).toBe yes
-		(expect @video.tab.id).toBe 371
-		(expect @video.tab.url).toBe "http://www.youtube.com/watch?v=5OWgxqoGedE"
-		(expect @video.tab.windowId).toBe 1
-		(expect @video.title).toBe "Foo Figthers - These Days - YouTube"
-		(expect @video.pending).toBe yes
+		(expect @video.id).toBeNull()
+		(expect @video.videoUrl).toEqual "http://www.youtube.com/watch?v=5OWgxqoGedE"
+		(expect @video.playing).toBeTruthy()
+		(expect @video.tab.id).toEqual 371
+		(expect @video.tab.url).toEqual "http://www.youtube.com/watch?v=5OWgxqoGedE"
+		(expect @video.tab.windowId).toEqual 1
+		(expect @video.title).toEqual "Foo Figthers - These Days - YouTube"
+		(expect @video.pending).toBeTruthy()
 
 	it "should remove the - YouTube suffix at the end of a video title", () ->
 		@video.setTitle "Linkin Park - Numb - YouTube"
-		(expect @video.getFormattedTitle()).toBe "Linkin Park - Numb"
+		(expect @video.getFormattedTitle()).toEqual "Linkin Park - Numb"
 
 	it "should return the title as it is, if there is no - YouTube suffix", () ->
 		@video.setTitle "Weird guy hits himself"
-		(expect @video.getFormattedTitle()).toBe "Weird guy hits himself"
+		(expect @video.getFormattedTitle()).toEqual "Weird guy hits himself"
 
 describe "The video mixin event publishing when properties changes using the setters", () ->
 
@@ -99,15 +99,15 @@ describe "The video mixin event publishing when properties changes using the set
 		expect(@tabChanged).toHaveBeenCalledWith tab
 
 	it "should return true in hasTab if there is a tab attached", () ->
-		expect(@video.hasTab()).toBe no
+		expect(@video.hasTab()).toBeFalsy()
 		@video.setTab id: 542
-		expect(@video.hasTab()).toBe yes
+		expect(@video.hasTab()).toBeTruthy()
 
 	it "should return false in hasTab if there is no tab attached", () ->
 		@video.setTab id: 456
-		expect(@video.hasTab()).toBe yes
+		expect(@video.hasTab()).toBeTruthy()
 		@video.setTab null
-		expect(@video.hasTab()).toBe no
+		expect(@video.hasTab()).toBeFalsy()
 
 	it "should trigger change event when changing tab id", () ->
 		@video.setTab id: 542

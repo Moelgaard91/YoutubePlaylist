@@ -106,8 +106,7 @@ class Video
 	# @event change:tab (tab)
 	###
 	setTab: (tab) ->
-		return if not tab? and not @tab?
-		return if tab?.id is @tab?.id
+		return if _.isEqual tab, @tab
 		@tab = tab
 		@publishEvent 'change:tab', tab
 

@@ -10,10 +10,19 @@
 	 "build_systems":
     [
         {
-            "name": "compileCoffee",
+            "name": "Build project",
             "cmd": ["cake build"],
             "selector": "source.coffee",
-            "shell": true
+            "shell": true,
+
+            "variants": [
+            	{
+            		"name": "Run test suite",
+            		"cmd": ["cake --nocolor test"],
+            		"shell": true,
+            		"selector": "source.coffee"
+            	}
+            ]
         }
     ]
 }

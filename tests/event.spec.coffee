@@ -14,17 +14,17 @@ describe 'The internal callback stack in the Event mixin', () ->
 		@event.subscribeEvent event, handler
 		(expect @event._events[event]).not.toBeUndefined()
 		len = @event._events[event].length
-		(expect len).toBe 1
+		(expect len).toEqual 1
 
 	it "and descrease in size, when a callback is unsubscribed from an event", () ->
 		event = 'test:is:happening'
 		handler = () ->
 		@event.subscribeEvent event, handler
 		len = _.size @event._events
-		(expect len).toBe 1
+		(expect len).toEqual 1
 		@event.unsubscribeEvent event, handler
 		len = _.size @event._events
-		(expect len).toBe 0
+		(expect len).toEqual 0
 
 	it "then it is cleand up internally when there is no more callbacks hooked up on the event", () ->
 		event = 'test:is:happening'
@@ -65,7 +65,7 @@ describe "The publisher/subscribe implementation", () ->
 		@event.publishEvent 'change:property', 'another property changed'
 
 		# expects the @propertyChanged to be called twice.
-		(expect @propertyChanged.calls.length).toBe 2
+		(expect @propertyChanged.calls.length).toEqual 2
 		
 		# the new callback to be called.
 		(expect @anotherPropertyChanged).toHaveBeenCalled()

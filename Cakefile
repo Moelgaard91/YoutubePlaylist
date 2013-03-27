@@ -5,6 +5,8 @@ mkdirp = require 'mkdirp'
 _ = require 'underscore'
 jasmine = require 'jasmine-node'
 
+option '--nocolor', '--nocolor', 'Add color to the test suite runner'
+
 input = 'src'
 output = 'build'
 
@@ -74,5 +76,18 @@ task 'build', 'Builds the project', (options) ->
 			)()
 
 task 'test', 'Run the test suite', (options) ->
-	exec 'node ./node_modules/jasmine-node/lib/jasmine-node/cli.js --coffee --color --verbose tests', (err, stdout, stderr) ->
-		console.log stdout
+	cmd = [
+		"node"
+		"./node_modules/jasmine-node/lib/jasmine-node/cli.js"
+		"--coffee"
+		"--verbose"
+	]
+	if options.nocolor
+		cmd.push '--noColor'
+	else
+		cmd.push '--color'
+	cmd.push 'tests'
+
+	console.log "Running tests...\n"
+	exec (cmd.join " "), (err, stdout, stderr) ->
+		console.log stdout.trim() if stdout?.trim?
