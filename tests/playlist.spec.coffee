@@ -94,7 +94,7 @@ describe "Playlist", () ->
 			(expect wrapper).toThrow()
 
 	describe "updateVideo()", () ->
-
+   
 		it "should update title and url of an existing video", () ->
 			video = @playlist.createVideo @tab
 			@playlist.updateVideo video, { id: @tab.id, title: "updated title - YouTube", url: "http://www.youtube.com/watch?v=rf4faDF43" }
@@ -103,7 +103,7 @@ describe "Playlist", () ->
 			(expect video.tab.title).toEqual "updated title - YouTube"
 			(expect video.tab.url).toEqual "http://www.youtube.com/watch?v=rf4faDF43"
 
-	describe "CHANGE DESCRIPTION", () ->
+	describe "Behaviour", () ->
 
 		it "should keep the priority list and internal reference list in sync", () ->
 			video = @playlist.createVideo @tab
