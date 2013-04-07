@@ -4,7 +4,7 @@ jasmine = require 'jasmine-node'
 {Video} = require '../src/background/video'
 {Playlist} = require '../src/background/playlist'
 
-describe "Playlist", () ->
+describe "Playlist class", () ->
 
 	beforeEach () ->
 		@playlist = new Playlist
