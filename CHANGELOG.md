@@ -1,5 +1,10 @@
 # Changelog for YouTube Playlist
 
+### Version 1.2.0 - 2013-04-12
+
+* Made the extension more stable
+* Wrote a lot of tests, to support the new rewriting of the API, and ensure that the Playlist has the correct behavior on Unit Test basis.
+
 ### Version 1.1.1 - 2013-03-25
 
 * Made the API a lot more consistent, now passing Video objects around, instead of ids.
