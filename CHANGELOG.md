@@ -1,8 +1,12 @@
 # Changelog for YouTube Playlist
 
+### Version 1.2.1 - 2013-04-12
+
+* Updated the name of the plugin to meet the branding guidlines for Chrome extensions.
+
 ### Version 1.2.0 - 2013-04-12
 
-* Made the extension more stable
+* Made the extension more stable.
 * Wrote a lot of tests, to support the new rewriting of the API, and ensure that the Playlist has the correct behavior on Unit Test basis.
 
 ### Version 1.1.1 - 2013-03-25
