@@ -16,7 +16,8 @@
 		"16": "browserAction/img/logo_16.png",
 		"24": "browserAction/img/logo_24.png",
 		"32": "browserAction/img/logo_32.png",
-		"48": "browserAction/img/logo_48.png"
+		"48": "browserAction/img/logo_48.png",
+		"128": "browserAction/img/logo_128.png"
 	},
 	"permissions": [
 		"tabs",
